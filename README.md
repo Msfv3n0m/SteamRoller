@@ -100,4 +100,5 @@ https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite
 ## Editions
 - PSExec.exe in main folder
 - sdelete.exe in main folder
+- Sysmon.exe in SharingIsCaring folder
 - all other tools in SharingIsCaring folder called tools.zip
