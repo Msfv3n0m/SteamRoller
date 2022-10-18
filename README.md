@@ -96,3 +96,8 @@ https://www.microsoft.com/en-us/download/details.aspx?id=55319
 https://processhacker.sourceforge.io/
 #### Sysinternals Suite
 https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite
+
+## Editions
+- PSExec.exe in main folder
+- sdelete.exe in main folder
+- all other tools in SharingIsCaring folder called tools.zip
