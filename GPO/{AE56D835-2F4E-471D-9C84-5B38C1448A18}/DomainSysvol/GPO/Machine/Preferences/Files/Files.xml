@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Files clsid="{215B2E53-57CE-475c-80FE-9EEC14635851}"><File clsid="{50BE44C8-567A-4ed1-B1D0-9234FE1F38AF}" name="tools.zip" status="tools.zip" image="2" changed="2022-10-18 22:56:07" uid="{99B6DC69-3F2B-44D3-B4B6-C8A1EB76ECE4}" bypassErrors="1"><Properties action="U" fromPath="\\replaceme1\SharingIsCaring\tools.zip" targetPath="C:\tools.zip" readOnly="0" archive="1" hidden="0" suppress="0"/></File>
-	<File clsid="{50BE44C8-567A-4ed1-B1D0-9234FE1F38AF}" name="Sysmon.exe" status="Sysmon.exe" image="2" changed="2022-10-18 22:56:18" uid="{738E921C-A7CC-4875-A180-6FB90FE67543}"><Properties action="U" fromPath="\\replaceme1\SharingIsCaring\Sysmon.exe" targetPath="C:\Sysmon.exe" readOnly="0" archive="1" hidden="0" suppress="0"/></File>
-</Files>
