@@ -19,6 +19,12 @@
    https://github.com/Msfv3n0m/SteamRoller
 #>
 
+function GetTools () {
+	$cd = $(pwd)
+	Get-ChildItem -File $cd\..\..\ | ?{$_.Name -like "*Syinternals*"} | %{Expand-Archive $_.Fullname}
+	
+}
+
 function ChangeADPass () {
     $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
     Add-Type -AssemblyName System.Web
@@ -176,6 +182,7 @@ function GPUpdate ($ServersList) {
   }
 }
 
+GetTools
 ChangeADPass
 $ServersList = $(Get-ADComputer -Filter * | ?{$_.DistinguishedName -like "*CN=Computers*"} | Select -ExpandProperty Name)
 Replace 
