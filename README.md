@@ -91,14 +91,10 @@ The PowerShellLogging GPO enables PowerShell script block logging and PowerShell
 - change hashes of sysinternals and rename?
 
 ## References
-#### Hallows Hunter
-https://github.com/hasherezade/hollows_hunter
-#### Microsoft's Security Compliance Toolkit
-https://www.microsoft.com/en-us/download/details.aspx?id=55319
-#### Process Hacker
-https://processhacker.sourceforge.io/
-#### Sysinternals Suite
-https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite
+- Hallows Hunter: https://github.com/hasherezade/hollows_hunter
+- Microsoft's Security Compliance Toolkit: https://www.microsoft.com/en-us/download/details.aspx?id=55319
+- Process Hacker: https://processhacker.sourceforge.io/
+- Sysinternals Suite: https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite
 
 ## Recommended Offline Additions
 - PSExec.exe in main folder
