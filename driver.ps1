@@ -23,9 +23,10 @@ function GetTools () {
 	$cd = $(pwd)
 	$downloads = "$cd\..\..\"
 	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
+	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
+	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
 	Copy-Item $downloads\Sysinternals\PSExec.exe $cd
 	Copy-Item $downloads\Sysinternals\sdelete.exe $cd
-
 	Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
 	Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
 	Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
