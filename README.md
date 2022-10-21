@@ -60,7 +60,7 @@ The unencrypted WinRM protocol allows users to remotely manage a Windows compute
 ### WinRM (encrypted)
 The encrypted version of WinRM secures the commands and feedback between a WinRM client and server. The WinRM (encrypted) GPO allows encrypted WinRM traffic through the firewall and launches the WinRM service.
 ### Tools
-System administration tools are desirable to have on both corporate servers and employee workstations. The Tools GPO distributes tools to all domain controllers and clients. The programs distributed via the Tools GPO include:
+System administration tools are desirable to have on both corporate servers and employee workstations. The Tools GPO distributes the tools.zip file to all domain controllers and clients. You can compile any tools you want into a tools.zip file in the SharingIsCaring folder and it will be pulled down by every client in the domain. In addition to a tools.zip file, the Tools GPO will also attempt to install sysmon on all domain clients. Although Sysmon is not included in this project, it can be added to the SharingIsCaring folder. Here are some examples of programs that could be distributed in the tools.zip file via the Tools GPO:
 - [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)
   - [Autoruns](https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns)
   - [Strings](https://learn.microsoft.com/en-us/sysinternals/downloads/strings)
@@ -72,11 +72,11 @@ System administration tools are desirable to have on both corporate servers and 
 - [Process Hacker](https://processhacker.sourceforge.io/)
 - [Hallows Hunter](https://github.com/hasherezade/hollows_hunter)
 ### Events
-The events GPO schedules tasks on domain clients. The Events GPO is responsible for installing [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) on each member of the domain.
+The Events GPO schedules tasks on domain clients. The Events GPO is responsible for installing [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) on each member of the domain.
 ### NoPowerShellLogging
-The NoPowerShellLogging GPO enables PowerShell script block logging and PowerShell transcription.
+The NoPowerShellLogging GPO disables PowerShell script block logging and PowerShell transcription.
 ### PowerShellLogging
-The PowerShellLogging GPO disables PowerShell script block logging and PowerShell transcription.
+The PowerShellLogging GPO enables PowerShell script block logging and PowerShell transcription.
 
 ## Future Development
 ### ADDS (LDAP)
@@ -88,7 +88,7 @@ The PowerShellLogging GPO disables PowerShell script block logging and PowerShel
 - minimum password length
 
 ### Tools
-- change hashes of sysinternals and rename
+- change hashes of sysinternals and rename?
 
 ## References
 #### Hallows Hunter
