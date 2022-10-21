@@ -7,7 +7,7 @@ This project is made for the purpose of automating basic security configurations
 3. Mass-distribution of system administration tools
 4. Domain-wide password changes
 
-SteamRoller3 differs from SteamRoller2 in that this version DOES NOT INCLUDE ANY EXTERNAL TOOLS. 
+SteamRoller3 differs from [SteamRoller2](https://github.com/Msfv3n0m/SteamRoller3) in that this version DOES NOT INCLUDE ANY EXTERNAL TOOLS. 
 
 ## Usage
 ```
