@@ -1,10 +1,13 @@
 ![](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.B6SgSO125PQvo3JQIIq8jQHaFP%26pid%3DApi&f=1&ipt=824c37a1645f5f6d265bdbd9f5e18d7e1fca279f297ec95283036cc4f84b8a9b&ipo=images)
 # SteamRoller3
 This project is made for the purpose of automating basic security configurations across an Active Directory environment. This project is made of several moving parts to accomplish the following:
+
 1. Normalize a secure base configuration
 2. Modular installations of reliable services
 3. Mass-distribution of system administration tools
 4. Domain-wide password changes
+
+SteamRoller3 differs from SteamRoller2 in that this version DOES NOT INCLUDE ANY EXTERNAL TOOLS. 
 
 ## Usage
 ```
