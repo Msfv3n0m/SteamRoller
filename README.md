@@ -100,7 +100,7 @@ https://processhacker.sourceforge.io/
 #### Sysinternals Suite
 https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite
 
-## Editions
+## Recommended Offline Additions
 - PSExec.exe in main folder
 - sdelete.exe in main folder
 - Sysmon.exe in SharingIsCaring folder
