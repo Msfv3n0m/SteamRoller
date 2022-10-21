@@ -21,8 +21,22 @@
 
 function GetTools () {
 	$cd = $(pwd)
-	Get-ChildItem -File $cd\..\..\ | ?{$_.Name -like "*Syinternals*"} | %{Expand-Archive $_.Fullname}
-	
+	$downloads = "$cd\..\..\"
+	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
+	Copy-Item $downloads\Sysinternals\PSExec.exe $cd
+	Copy-Item $downloads\Sysinternals\sdelete.exe $cd
+
+	Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
+	Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
+	Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
+	Copy-Item $downloads\Sysinternals\strings.exe $cd\SharingIsCaring\tools
+	Copy-Item $downloads\Sysinternals\TCPView.exe $cd\SharingIsCaring\tools
+	Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
+	Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
+	Read-Host "Press Enter To Continue."
+	Read-Host "Press Enter To Continue.."
+	Read-Host "Press Enter To Continue..."
+	Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 }
 
 function ChangeADPass () {
