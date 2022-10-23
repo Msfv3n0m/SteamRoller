@@ -149,7 +149,7 @@ function ChangeLocalPasswords ($ServersList) {
   $cd = $(pwd)
   $ServersList | %{
     Try {
-		& $cd\PsExec.exe \\$_ -s -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Host `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
+		& $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Host `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
 	}
     Catch {
     	  Write-Output "Could not access " $_
@@ -189,7 +189,7 @@ function GPUpdate ($ServersList) {
   $cd = $(pwd)
   $ServersList | %{
     Try {
-		& $cd\PsExec.exe \\$_ -s -nobanner -accepteula cmd /c gpupdate /force
+		& $cd\PsExec.exe \\$_ -nobanner -accepteula cmd /c gpupdate /force
 	}
     Catch {
     	  Write-Output "Could not access " $_
