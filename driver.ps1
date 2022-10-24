@@ -19,6 +19,12 @@
    https://github.com/Msfv3n0m/SteamRoller
 #>
 
+function Resume () {
+	Read-Host "Press enter to continue."
+	Read-Host "Press enter to continue.."
+	Read-Host "Press enter to continue..."
+}
+
 function GetTools () {
 	$cd = $(pwd)
 	$downloads = "$cd\..\..\"
@@ -34,9 +40,7 @@ function GetTools () {
 	Copy-Item $downloads\Sysinternals\TCPView.exe $cd\SharingIsCaring\tools
 	Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
 	Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
-	Read-Host "Press Enter To Continue."
-	Read-Host "Press Enter To Continue.."
-	Read-Host "Press Enter To Continue..."
+	Resume
 	Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 }
 
@@ -137,12 +141,6 @@ function Replace () {
 function StartSMBShare () {
     net share SharingIsCaring="$(pwd)\SharingIsCaring"
     icacls.exe "$(pwd)\SharingIsCaring" /inheritancelevel:e /grant "*S-1-5-11:(OI)(CI)(R)" #grant acess to authenticated users
-}
-
-function Resume () {
-	Read-Host "Press enter to continue."
-	Read-Host "Press enter to continue.."
-	Read-Host "Press enter to continue..."
 }
 
 function ChangeLocalPasswords ($ServersList) {
