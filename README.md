@@ -7,7 +7,7 @@ This project is made for the purpose of automating basic security configurations
 3. Mass-distribution of system administration tools
 4. Domain-wide password changes
 
-SteamRoller3 differs from [SteamRoller2](https://github.com/Msfv3n0m/SteamRoller3) in that this version DOES NOT INCLUDE ANY EXTERNAL TOOLS. 
+SteamRoller3 DOES NOT INCLUDE ANY EXTERNAL TOOLS. Because of this, it will internally attempt to find import popular system administration tools such as the Sysinternals suite. It does require Sysinternals to be at least downloaded in order for this program to run properly.
 
 ## Usage
 ```
@@ -22,16 +22,17 @@ Launch start.bat or driver.ps1 as an administrator. This can be achieved by righ
 ![](https://github.com/Msfv3n0m/Images/blob/main/SteamRoller1.PNG)
 
 ## Process Description
-This section follows a chronological mid-level walkthrough of this project 
-- The program will try to collect popular system administration tools in order that they may be distributed to all domain clients.
+This section follows a pseudo-chronological mid-level walkthrough of this project 
+- The program will try to collect popular system administration tools in order that the program may function properly and that they may be distributed to all domain clients.
 - All domain users' whose username is not "Administrator" will have their password changed to a random value. This value is generated on the domain controller where the program is run. The plaintext credentials are then sent to C:\incred.csv
 - In the Tools GPO, there is a "replaceme1" string. That is where the hostname of the domain controller goes. The program will replace the "replaceme1" string with it's own hostname.
-  - Files are coppied via GPO through SMB shares. Therefore in order for files to be distributed, two things must happen: an smb share must be started, and the hostname or ip address of the machine where source files exist must be in the GPO.
+  - Files are coppied via GPO through SMB shares. Therefore in order for files to be distributed, two things must happen: an smb share must be started, and the hostname or ip address of the machine where source files exist must be in the GPO. This step satisfies the latter requirement
 - The backup GPO in the GPO folder are imported into the Group Policy Management Console
 - An organizational unit is created for each computer in the domain such that GPO can be linked and enabled in a modular fashion to fit the needs of the server/workstation
 - The SMB Share is started
 - The program pauses to allow a manual "gpupdate /force" on each computer in the domain
 - Sysmon is installed on each member of the domain 
+- General, NoPowerShellLogging, and SMB GPOs are applied to all CLIENT computers in the domain to allow for the next step to occur securely
 - PSExec - a tool from Mark Russinovich's Sysinternals - is used to change the passwords for local users on each CLIENT computer in the domain. The new credentials are compiled into the C:\incred.csv file on the domain controller in plaintext.
   - This method does not store the domain administrator credentials in memory on the client computers because the login is of type 3 (credentials are only stored on type 2 logins)
   - PowerShell logging is disabled via GPO to prevent logs showing the users and their new passwords
