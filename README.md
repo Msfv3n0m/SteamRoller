@@ -48,19 +48,19 @@ This section follows a pseudo-chronological mid-level walkthrough of this projec
 ### General
 There are many misconfigurations and vulnerabilities that exist natively in Windows. The General GPO hardens Windows as a whole to prevent common exploitations and privelage escalation opportunities for malicious actors. This GPO implements rules to enforce SOME industry best practices in Windows Server 2012 and beyond.
 ### ADDS (LDAP)
-Active Directory is a common service offered in an enterprise environments. To ensure a resistent and reliable service configuration for domain controllers, the ADDS (LDAP) GPO allows only necessary traffic in, and starts the NTDS service.
+Active Directory is a common service offered in an enterprise environments. To ensure a resistent and reliable service configuration for domain controllers, the ADDS (LDAP) GPO allows only necessary traffic in.
 ### HTTP (IIS)
-HTTP is a basic protocol that is used to offer unencrypted websites - this is typically only for internal use only. To ensure that a website is not prone to accidental misconfigurations in the firewall or service status, the HTTP (IIS) GPO enables the apropriate firewall rules to allow client access to the website and starts the web publishing service in Microsoft's Internet Information Service.
+HTTP is a basic protocol that is used to offer unencrypted websites - this is typically only for internal use only. To ensure that a website is not prone to accidental misconfigurations in the firewall or service status, the HTTP (IIS) GPO enables the apropriate firewall rules to allow client access to the website.
 ### HTTPS (IIS)
-HTTPS is the secure version of HTTP. The HTTPS GPO should be applied when a secure web service is running on the computers within an organizational unit. This GPO allows HTTPS traffic into the web service and regulates the status of the service.
+HTTPS is the secure version of HTTP. The HTTPS GPO should be applied when a secure web service is running on the computers within an organizational unit. This GPO allows HTTPS traffic into the web service.
 ### RDP
-Remote Desktop is necessary for remote access to a Windows computer via the user interface. The RDP GPO allows RDP traffic through the firewall and makes sure the RDP service is running.
+Remote Desktop is necessary for remote access to a Windows computer via the user interface. The RDP GPO allows RDP traffic through the firewall.
 ### SMB
 SMB is used to share resources such as files or printers between computers. A famous exploitation of this protocol is known as Eternal Blue or MS17-010. The SMB GPO mitigates the risk associated with this vulnerability, and maintains granted access to SMB resources. 
 ### WinRM (unencrypted)
-The unencrypted WinRM protocol allows users to remotely manage a Windows computer via the command line. The WinRM (unencrypted) GPO allows unencrypted WinRM access through the firewall and initiates the WinRM service.
+The unencrypted WinRM protocol allows users to remotely manage a Windows computer via the command line. The WinRM (unencrypted) GPO allows unencrypted WinRM access through the firewall.
 ### WinRM (encrypted)
-The encrypted version of WinRM secures the commands and feedback between a WinRM client and server. The WinRM (encrypted) GPO allows encrypted WinRM traffic through the firewall and launches the WinRM service.
+The encrypted version of WinRM secures the commands and feedback between a WinRM client and server. The WinRM (encrypted) GPO allows encrypted WinRM traffic through the firewall.
 ### Tools
 System administration tools are desirable to have on both corporate servers and employee workstations. The Tools GPO distributes the tools.zip file to all domain controllers and clients. You can compile any tools you want into a tools.zip file in the SharingIsCaring folder and it will be pulled down by every client in the domain. In addition to a tools.zip file, the Tools GPO will also attempt to install sysmon on all domain clients. Although Sysmon is not included in this project, it can be added to the SharingIsCaring folder. Here are some examples of programs that could be distributed in the tools.zip file via the Tools GPO:
 - [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)
