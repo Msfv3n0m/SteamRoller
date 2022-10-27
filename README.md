@@ -1,13 +1,13 @@
 ![](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.B6SgSO125PQvo3JQIIq8jQHaFP%26pid%3DApi&f=1&ipt=824c37a1645f5f6d265bdbd9f5e18d7e1fca279f297ec95283036cc4f84b8a9b&ipo=images)
 # SteamRoller3
-This project is made for the purpose of automating basic security configurations across an Active Directory environment. This project is made of several moving parts to accomplish the following:
+This project is made for the purpose of automating basic security configurations across an Active Directory environment. It is made of several moving parts to accomplish the following:
 
 1. Normalize a secure base configuration
 2. Modular installations of reliable service settings
 3. Mass-distribution of system administration tools
 4. Domain-wide password changes for local and domain users
 
-SteamRoller3 DOES NOT INCLUDE ANY EXTERNAL TOOLS. Because of this, it will internally attempt to find import popular system administration tools such as the Sysinternals suite. It does require Sysinternals to be at least downloaded in order for this program to run properly.
+SteamRoller3 DOES NOT INCLUDE ANY EXTERNAL TOOLS. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly.
 
 ## Usage
 ```
@@ -94,7 +94,9 @@ The PowerShellLogging GPO enables PowerShell script block logging and PowerShell
 
 ## References
 - Microsoft's Security Compliance Toolkit: https://www.microsoft.com/en-us/download/details.aspx?id=55319
-
+- Process Hacker: https://sourceforge.net/projects/processhacker/
+- Sysinternals Suite: https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite
+- Hollows_Hunter: https://github.com/hasherezade/hollows_hunter
 ## Recommended Offline Additions
 - PSExec.exe in main folder
 - sdelete.exe in main folder
