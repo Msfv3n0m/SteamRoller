@@ -3,9 +3,9 @@
 This project is made for the purpose of automating basic security configurations across an Active Directory environment. This project is made of several moving parts to accomplish the following:
 
 1. Normalize a secure base configuration
-2. Modular installations of reliable services
+2. Modular installations of reliable service settings
 3. Mass-distribution of system administration tools
-4. Domain-wide password changes
+4. Domain-wide password changes for local and domain users
 
 SteamRoller3 DOES NOT INCLUDE ANY EXTERNAL TOOLS. Because of this, it will internally attempt to find import popular system administration tools such as the Sysinternals suite. It does require Sysinternals to be at least downloaded in order for this program to run properly.
 
