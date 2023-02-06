@@ -34,15 +34,18 @@ function GetTools () {
 	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
 	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
 	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
-	Copy-Item $downloads\Sysinternals\PSExec.exe $cd
-	Copy-Item $downloads\Sysinternals\sdelete.exe $cd
-	Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\strings.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\TCPView.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
+    gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
+    if (Test-Path $downloads\Sysinternals\) {
+        Copy-Item $downloads\Sysinternals\PSExec.exe $cd
+        Copy-Item $downloads\Sysinternals\sdelete.exe $cd
+        Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\strings.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\TCPView.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
+    }
 	Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
 	Resume
 	Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
