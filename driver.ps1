@@ -20,9 +20,12 @@
 #>
 
 function Resume () {
-	Read-Host "Press enter to continue."
-	Read-Host "Press enter to continue.."
-	Read-Host "Press enter to continue..."
+	$input = ""
+	While ($input -ne "cont") {
+	Write-Host "Type 'cont' to continue `n" -ForegroundColor Yellow
+	$input = Read-Host "input"
+	}
+	Write-Host "`n"
 }
 
 function GetTools () {
@@ -31,15 +34,19 @@ function GetTools () {
 	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
 	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
 	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
-	Copy-Item $downloads\Sysinternals\PSExec.exe $cd
-	Copy-Item $downloads\Sysinternals\sdelete.exe $cd
-	Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\strings.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\TCPView.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
-	Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
+    gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
+    if (Test-Path $downloads\Sysinternals\) {
+        Copy-Item $downloads\Sysinternals\PSExec.exe $cd
+        Copy-Item $downloads\Sysinternals\sdelete.exe $cd
+        Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\strings.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\TCPView.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
+        Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
+    }
+	Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
 	Resume
 	Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 }
@@ -47,10 +54,10 @@ function GetTools () {
 function ChangeADPass () {
     $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
     Add-Type -AssemblyName System.Web
-    Write-Output "Username, Password" > C:\incred.csv
+    Write-Output "Username,Password" > C:\incred.csv
     Get-ADUser -Filter * | ?{$_.Name -ne "Administrator"} | %{
     $user = $_.Name
-    $pass = [System.Web.Security.Membership]::GeneratePassword(20,2)
+    $pass = [System.Web.Security.Membership]::GeneratePassword(15,2)
     Write-Output "$domain\$user,$pass" >> C:\incred.csv
     Set-ADAccountPassword -Identity $_.Name -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
     $pass = $Null
@@ -81,18 +88,19 @@ function ImportGPO1 () {
 <#
 This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
 #>
+    Write-Host "Importing GPOs..."
     $GpoMap = ImportGPO2("$(pwd)\GPO")
-    Write-Host "Importing the following GPOs:" -ForegroundColor Cyan
-    Write-Host
-    $GpoMap.Keys | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
-    Write-Host
-    Write-Host
+    #Write-Host "Importing the following GPOs:"
+    #Write-Host
+    #$GpoMap.Keys | ForEach-Object { Write-Host $_ }
+    #Write-Host
+    #Write-Host
     $gpoDir = "$(pwd)\GPO"
     $GpoMap.Keys | ForEach-Object {
         $key = $_
         $guid = $GpoMap[$key]
-        Write-Host ($guid + ": " + $key) -ForegroundColor Cyan
-        Import-GPO -BackupId $guid -Path $gpoDir -TargetName "$key" -CreateIfNeeded
+        #Write-Host ($guid + ": " + $key)
+        Import-GPO -BackupId $guid -Path $gpoDir -TargetName "$key" -CreateIfNeeded | Out-Null
     }
 }
 
@@ -147,7 +155,8 @@ function ChangeLocalPasswords ($ServersList) {
   $cd = $(pwd)
   $ServersList | %{
     Try {
-		& $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Host `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
+    		& $cd\PSExec.exe \\$_ -NoBanner -AcceptEULA PowerShell -Command "Add-Type -AssemblyName System.Web;`$c=',';`$h=`$(hostname);Get-WMIObject Win32_Useraccount | Select -ExpandProperty Name | ?{ `$_ -ne 'Administrator' } | %{`$pass = [System.Web.Security.Membership]::GeneratePassword(15,2); Write-Output `$h\`$_`$c`$pass`n; Net User `$_ `$pass > `$NULL; `$pass = `$NULL }" >> C:\incred.csv
+		#& $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
 	}
     Catch {
     	  Write-Output "Could not access " $_
@@ -176,7 +185,7 @@ function RemoveLinks ($ServersList) {
 }
 
 function StopSMBShare () {
-  net share SharingIsCaring /del
+  net share SharingIsCaring /del /yes
 }
 
 function DeleteDriver () {
@@ -202,9 +211,12 @@ Replace
 ImportGPO1 
 CreateOUAndDistribute 
 StartSMBShare 
+Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 Resume
 ChangeLocalPasswords $ServersList
 RemoveLinks $ServersList
 StopSMBShare
-GPUpdate $ServersList
+#GPUpdate $ServersList
+Remove-GPO -Name "NoPowerShellLogging"
+Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 DeleteDriver
