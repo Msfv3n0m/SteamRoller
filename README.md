@@ -7,7 +7,7 @@ This project is made for the purpose of automating basic security configurations
 3. Mass-distribution of system administration tools
 4. Domain-wide password changes for local and domain users
 
-SteamRoller3 DOES NOT INCLUDE ANY EXTERNAL TOOLS. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly.
+SteamRoller3 DOES NOT INCLUDE ANY EXTERNAL TOOLS. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), [BlueSpawn](https://github.com/ION28/BLUESPAWN), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly.
 
 ## Table of Contents
 - [SteamRoller3](#steamroller3)
@@ -183,7 +183,12 @@ System administration tools are desirable to have on both corporate servers and 
   - [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - [Process Hacker](https://processhacker.sourceforge.io/)
 - [Hallows Hunter](https://github.com/hasherezade/hollows_hunter)
-- [Bluespawn](https://github.com/ION28/BLUESPAWN)
+- [Bluespawn](https://github.com/ION28/BLUESPAWN) </br>
+
+Here are some tools that are included in the SharingIsCaring/tools folder:
+- batch pii scanner
+- PowerShell webshell scanner
+
 ### Events
 The Events GPO schedules tasks on domain clients. The Events GPO is responsible for installing [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) on each member of the domain.
 
