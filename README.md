@@ -11,26 +11,27 @@ SteamRoller3 DOES NOT INCLUDE ANY EXTERNAL TOOLS. Because of this, it will inter
 
 ## Table of Contents
 - [SteamRoller3](#steamroller3)
-  * [Usage](#usage)
-  * [Process Description](#process-description)
-  * [GPOs](#gpos)
-    + [General](#general)
-    + [ADDS (LDAP)](#adds--ldap-)
-    + [HTTP (IIS)](#http--iis-)
-    + [HTTPS (IIS)](#https--iis-)
-    + [RDP](#rdp)
-    + [SMB](#smb)
-    + [WinRM (unencrypted)](#winrm--unencrypted-)
-    + [WinRM (encrypted)](#winrm--encrypted-)
-    + [Tools](#tools)
-    + [Events](#events)
-    + [PowerShellLogging](#powershelllogging)
-  * [Future Development](#future-development)
-    + [ADDS (LDAP)](#adds--ldap--1)
-    + [General](#general-1)
-    + [Tools](#tools-1)
-  * [References](#references)
-  * [Recommended Offline Additions](#recommended-offline-additions)
+  - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
+  - [Process Description](#process-description)
+  - [GPOs](#gpos)
+    - [General](#general)
+    - [ADDS (LDAP)](#adds-ldap)
+    - [HTTP (IIS)](#http-iis)
+    - [HTTPS (IIS)](#https-iis)
+    - [RDP](#rdp)
+    - [SMB](#smb)
+    - [WinRM (unencrypted)](#winrm-unencrypted)
+    - [WinRM (encrypted)](#winrm-encrypted)
+    - [Tools](#tools)
+    - [Events](#events)
+    - [PowerShellLogging](#powershelllogging)
+  - [Future Development](#future-development)
+    - [ADDS (LDAP)](#adds-ldap-1)
+    - [General](#general-1)
+    - [Tools](#tools-1)
+  - [References](#references)
+  - [Recommended Offline Additions](#recommended-offline-additions)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -103,9 +104,10 @@ ldap client signing requirements | negotiate signing | although I would like to 
 | behavior of the elevation prompt for standard users | automatically deny elevation requests | standard users should not have access to elevated command line sessions | 
 | restrict clients allowed to make remote calls to sam | administrators only | sensative information in sam accounts should only be accessed by administrators | 
 | allow localsystem null session fallback | disabled | this setting will allow unauthorized access on failure | 
-| domain firewall profile | block inbound, allow outbound | to ensure that regular operations are allowed upon the first running of this program, outbound traffic is still allowed |
-| private firewall profile | block inbound, allow outbound | to ensure that regular operations are allowed upon the first running of this program, outbound traffic is still allowed |
-| public firewall profile | block inbound, allow outbound | to ensure that regular operations are allowed upon the first running of this program, outbound traffic is still allowed |
+| domain firewall profile | block inbound, block outbound | to ensure that regular operations are allowed upon the first running of this program, outbound traffic is still allowed |
+| private firewall profile | block inbound, block outbound | to ensure that regular operations are allowed upon the first running of this program, outbound traffic is still allowed |
+| public firewall profile | block inbound, block outbound | to ensure that regular operations are allowed upon the first running of this program, outbound traffic is still allowed |
+| core networking firewall rules | enabled | this allows each host in the domain to fully rely on GPO for firewall rules while only allowing necessary interhost communication |
 | execution policy | users cannot launch cmd, powershell, or powershell_ise | corporate users should not have access to the command line interface to restrict unnecessary access to command line interfaces | 
 | turn off multi-homed name resolution | enabled | this setting prevents llmnr poisoning |
 | turn off smart protocol reordering | enabled | this setting prevents llmnr poisoning | 
@@ -146,7 +148,7 @@ Remote Desktop is necessary for remote access to a Windows computer via the user
 SMB is used to share resources such as files or printers between computers. A famous exploitation of this protocol is known as Eternal Blue or MS17-010. The SMB GPO mitigates the risk associated with this vulnerability, and maintains granted access to SMB resources. The following are settings that are enforced in the SMB GPO:
 | Setting | Value | Why |
 | --- | :-: | --- | 
-| default SMB server firewall rules | enabled | these rules will be enabled at the domain level so that a SMB server's firewall rules cannot be tampered with locally |
+| subset of default SMB server firewall rules | enabled | these rules will be enabled at the domain level so that a SMB server's firewall rules cannot be tampered with locally |
 ### WinRM (unencrypted)
 The unencrypted WinRM protocol allows users to remotely manage a Windows computer via the command line. The WinRM (unencrypted) GPO allows unencrypted WinRM access through the firewall. The following are settings that are enforced in the WinRM (unencrypted) GPO:
 | Setting | Value | Why |
