@@ -106,7 +106,7 @@ This function is a derivative of a script found in Microsoft's Security Complian
 
 function CreateOUAndDistribute () {
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-    Get-ADComputer -Filter * | %{
+    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} | %{
 	$input1 = "CN=" + $_.Name + ",CN=Computers," + $root
 	$input2 = "OU=" + $_.Name + "," + $root
 	$input3 = "OU=" + $_.Name + "," + $root
