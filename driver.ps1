@@ -109,7 +109,6 @@ function CreateOUAndDistribute () {
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",CN=Computers," + $root
 	$input2 = "OU=" + $_.Name + "," + $root
-        if ($_.DistinguishedName -like "*CN=Computers*") {
             New-ADOrganizationalUnit -Name $_.Name -Path $root 
             Move-ADObject -Identity $input1 -TargetPath $input2
             New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -118,7 +117,7 @@ function CreateOUAndDistribute () {
             New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
 	    New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
         }
-        else {
+	Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
 	    $input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
 	    $input2 = "OU=" + $_.Name + "," + $root
             New-ADOrganizationalUnit -Name $_.Name -Path $root 
