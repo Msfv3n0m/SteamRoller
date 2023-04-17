@@ -106,13 +106,12 @@ This function is a derivative of a script found in Microsoft's Security Complian
 
 function CreateOUAndDistribute () {
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} | %{
+    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",CN=Computers," + $root
 	$input2 = "OU=" + $_.Name + "," + $root
-	$input3 = "OU=" + $_.Name + "," + $root
         if ($_.DistinguishedName -like "*CN=Computers*") {
             New-ADOrganizationalUnit -Name $_.Name -Path $root 
-            Move-ADObject -Identity $input1 -TargetPath $input3
+            Move-ADObject -Identity $input1 -TargetPath $input2
             New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
             New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
             New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -122,9 +121,8 @@ function CreateOUAndDistribute () {
         else {
 	    $input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
 	    $input2 = "OU=" + $_.Name + "," + $root
-	    $input3 = "OU=" + $_.Name + "," + $root
             New-ADOrganizationalUnit -Name $_.Name -Path $root 
-            Move-ADObject -Identity $input1 -TargetPath $input3
+            Move-ADObject -Identity $input1 -TargetPath $input2
             New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
             New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
             New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
