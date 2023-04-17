@@ -30,7 +30,7 @@ function Resume () {
 
 function GetTools () {
 	$cd = $(pwd)
-	$downloads = "$cd\..\..\"
+	$downloads = "$home\Downloads"
 	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
 	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
 	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
