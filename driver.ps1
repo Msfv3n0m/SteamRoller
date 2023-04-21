@@ -30,7 +30,7 @@ function Resume () {
 
 function GetTools () {
 	$cd = $(pwd)
-	$downloads = "$cd\..\..\"
+	$downloads = "$home\Downloads"
 	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
 	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
 	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
@@ -106,30 +106,26 @@ This function is a derivative of a script found in Microsoft's Security Complian
 
 function CreateOUAndDistribute () {
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} | %{
+    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",CN=Computers," + $root
 	$input2 = "OU=" + $_.Name + "," + $root
-	$input3 = "OU=" + $_.Name + "," + $root
-        if ($_.DistinguishedName -like "*CN=Computers*") {
-            New-ADOrganizationalUnit -Name $_.Name -Path $root 
-            Move-ADObject -Identity $input1 -TargetPath $input3
-            New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-            New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
-            New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
-            New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-	    New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        }
-        else {
-	    $input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
-	    $input2 = "OU=" + $_.Name + "," + $root
-	    $input3 = "OU=" + $_.Name + "," + $root
-            New-ADOrganizationalUnit -Name $_.Name -Path $root 
-            Move-ADObject -Identity $input1 -TargetPath $input3
-            New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-            New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
-            New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-	    New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        }
+        New-ADOrganizationalUnit -Name $_.Name -Path $root 
+        Move-ADObject -Identity $input1 -TargetPath $input2
+        New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
+	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    }
+    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
+	$input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
+	$input2 = "OU=" + $_.Name + "," + $root
+        New-ADOrganizationalUnit -Name $_.Name -Path $root 
+        Move-ADObject -Identity $input1 -TargetPath $input2
+        New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
+	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
 }
 
@@ -155,7 +151,7 @@ function ChangeLocalPasswords ($ServersList) {
   $cd = $(pwd)
   $ServersList | %{
     Try {
-    		#& $cd\PSExec.exe \\$_ -NoBanner -AcceptEULA PowerShell -Command "Add-Type -AssemblyName System.Web;`$c=',';`$h=`$(hostname);Get-WMIObject -Class Win32_Useraccount -Computername localhost | Select -ExpandProperty Name | ?{ `$_ -ne 'Administrator' } | %{`$pass = [System.Web.Security.Membership]::GeneratePassword(15,2); Write-Output `$h\`$_`$c`$pass`n; Net User `$_ `$pass > `$NULL; `$pass = `$NULL }" >> C:\incred.csv
+    		#& $cd\PSExec.exe \\$_ -NoBanner -AcceptEULA PowerShell -Command "Add-Type -AssemblyName System.Web;`$c=',';`$h=`$(hostname);Get-WMIObject -Class Win32_Useraccount -Computername localhost ?{ `$_.Name -ne 'Administrator' } | %{`$pass = [System.Web.Security.Membership]::GeneratePassword(15,2); `$_.SetPassword(`$pass); Write-Output `$h\`$_`$c`$pass`n; Net User `$_ `$pass > `$NULL; `$pass = `$NULL }" >> C:\incred.csv
 		& $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
 	}
     Catch {
@@ -166,21 +162,20 @@ function ChangeLocalPasswords ($ServersList) {
 
 function RemoveLinks ($ServersList) {
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-    Get-ADComputer -Filter * | %{
-    $input2 = "OU=" + $_.Name + "," + $root
-    if ($_.Name -in $ServersList) {
-    	    Remove-GPLink -Name "Tools" -Target $input2
-            Remove-GPLink -Name "SMB" -Target $input2 
-            Remove-GPLink -Name "Events" -Target $input2
-	    Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
-	    New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    	}
-    else {
-            Remove-GPLink -Name "Tools" -Target $input2
-            Remove-GPLink -Name "Events" -Target $input2
-	    Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
-	    New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    	}
+    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
+        $input2 = "OU=" + $_.Name + "," + $root
+	Remove-GPLink -Name "Tools" -Target $input2
+        Remove-GPLink -Name "SMB" -Target $input2 
+        Remove-GPLink -Name "Events" -Target $input2
+	Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
+	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    }
+    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
+        $input2 = "OU=" + $_.Name + "," + $root
+        Remove-GPLink -Name "Tools" -Target $input2
+        Remove-GPLink -Name "Events" -Target $input2
+	Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
+	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
 }
 
@@ -206,7 +201,8 @@ function GPUpdate ($ServersList) {
 
 GetTools
 ChangeADPass
-$ServersList = $(Get-ADComputer -Filter * | ?{$_.DistinguishedName -like "*CN=Computers*"} | Select -ExpandProperty Name)
+$root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
+$ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)
 Replace 
 ImportGPO1 
 CreateOUAndDistribute 
