@@ -18,7 +18,12 @@
 .LINK
    https://github.com/Msfv3n0m/SteamRoller
 #>
-
+Param(
+    [Parameter(Position=1)]
+    [Boolean]$outFile,
+    [Parameter(Position=2)]
+    [string]$fileName
+)
 function Resume () {
 	$input = ""
 	While ($input -ne "cont") {
