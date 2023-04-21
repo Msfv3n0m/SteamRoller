@@ -45,7 +45,7 @@ Or
 ```
 Launch start.bat or driver.ps1 as an administrator. This can be achieved by right clicking the program and selecting "Start as an administrator." Or you can run the program with an elevated Command Prompt / PowerShell console using the appropriate command above.
 
-![](https://github.com/Msfv3n0m/Images/blob/main/SteamRoller1.PNG)
+![](https://github.com/Msfv3n0m/SteamRoller3/blob/main/SteamRoller1.png)
 
 ## Process Description
 This section follows a pseudo-chronological mid-level walkthrough of this project 
