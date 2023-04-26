@@ -152,12 +152,17 @@ function ChangeLocalPasswords ($ServersList) {
   $ServersList | %{
     Try {
         Invoke-Command -ComputerName $_ -ScriptBlock {
-            Add-Type -AssemblyName System.Web
-            Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
-                $pass=[System.Web.Security.Membership]::GeneratePassword(20,2)
-                Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
-                Write-Output "$(hostname)\$_.Name,$pass"
-                $pass = $Null
+            Try {
+                Add-Type -AssemblyName System.Web
+                Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
+                        $pass=[System.Web.Security.Membership]::GeneratePassword(20,2)
+                        Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
+                        Write-Output "$(hostname)\$_.Name,$pass"
+                        $pass = $Null
+                }
+            }
+            Catch {
+                for /f "skip=1" %a in ('net user') do net user %a new_pass          # pass contingency password through psremoting
             }
         } >> C:\incred.csv 
 		# & $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
@@ -196,17 +201,17 @@ function DeleteDriver () {
 	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1"
 }
 
+# Main
 # Variables
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)    # used in removelinks and createouanddistribute
 $cd = $(pwd)                                                                # used in changelocalpasswords, gettools, importgpo1, deletedriver, startsmbshare, replace
 $gpoDir = "$(pwd)\GPO"                                                      # used in importgpo1
 $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)              # used in changeadpass
 $downloads = "$home\Downloads"                                              # used in gettools
-
-#Main
-GetTools
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
 $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)
+
+GetTools
 Replace 
 ImportGPO1 
 CreateOUAndDistribute 
