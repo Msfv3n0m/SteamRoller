@@ -18,12 +18,6 @@
 .LINK
    https://github.com/Msfv3n0m/SteamRoller
 #>
-Param(
-    [Parameter(Position=1)]
-    [Boolean]$outFile,
-    [Parameter(Position=2)]
-    [string]$fileName
-)
 function Resume () {
 	$input = ""
 	While ($input -ne "cont") {
@@ -117,7 +111,7 @@ function CreateOUAndDistribute () {
         New-ADOrganizationalUnit -Name $_.Name -Path $root 
         Move-ADObject -Identity $input1 -TargetPath $input2
         New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "WinRM (unencrypted)" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
 	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -128,6 +122,7 @@ function CreateOUAndDistribute () {
         New-ADOrganizationalUnit -Name $_.Name -Path $root 
         Move-ADObject -Identity $input1 -TargetPath $input2
         New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "WinRM (unencrypted)" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
 	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -156,7 +151,7 @@ function ChangeLocalPasswords ($ServersList) {
   $cd = $(pwd)
   $ServersList | %{
     Try {
-    		#& $cd\PSExec.exe \\$_ -NoBanner -AcceptEULA PowerShell -Command "Add-Type -AssemblyName System.Web;`$c=',';`$h=`$(hostname);Get-WMIObject -Class Win32_Useraccount -Computername localhost ?{ `$_.Name -ne 'Administrator' } | %{`$pass = [System.Web.Security.Membership]::GeneratePassword(15,2); `$_.SetPassword(`$pass); Write-Output `$h\`$_`$c`$pass`n; Net User `$_ `$pass > `$NULL; `$pass = `$NULL }" >> C:\incred.csv
+        # Invoke-Command -ComputerName $_ -ScriptBlock {} >> C:\incred.csv 
 		& $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
 	}
     Catch {
@@ -170,7 +165,7 @@ function RemoveLinks ($ServersList) {
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
 	Remove-GPLink -Name "Tools" -Target $input2
-        Remove-GPLink -Name "SMB" -Target $input2 
+        Remove-GPLink -Name "WinRM (unencrypted)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
 	Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
 	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -178,6 +173,7 @@ function RemoveLinks ($ServersList) {
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
         Remove-GPLink -Name "Tools" -Target $input2
+        Remove-GPLink -Name "WinRM (unencrypted)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
 	Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
 	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -205,7 +201,6 @@ function GPUpdate ($ServersList) {
 }
 
 GetTools
-ChangeADPass
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
 $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)
 Replace 
@@ -219,5 +214,6 @@ RemoveLinks $ServersList
 StopSMBShare
 #GPUpdate $ServersList
 Remove-GPO -Name "NoPowerShellLogging"
+ChangeADPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 DeleteDriver
