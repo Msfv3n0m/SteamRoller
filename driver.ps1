@@ -149,22 +149,27 @@ function StartSMBShare () {
 
 function ChangeLocalPasswords ($ServersList) {
   $cd = $(pwd)
+  $newPass="Chiapet1"
+  $cmdCommand1 = @"
+  for /f "skip=1" %a in ('net user') do net user %a $newPass 
+"@ # > null
   $ServersList | %{
     Try {
-        Invoke-Command -ComputerName $_ -ScriptBlock {
+        Invoke-Command -ComputerName $_ -ArgumentList $h,$cmdCommand -ScriptBlock {
+            Param($h,$cmdCommand)
             Try {
                 Add-Type -AssemblyName System.Web
                 Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
                         $pass=[System.Web.Security.Membership]::GeneratePassword(20,2)
                         Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
-                        Write-Output "$(hostname)\$_.Name,$pass"
+                        # Write-Output "$h\$_.Name,$pass"
                         $pass = $Null
                 }
             }
             Catch {
-                for /f "skip=1" %a in ('net user') do net user %a new_pass          # pass contingency password through psremoting
+                cmd /c $cmdCommand          # pass contingency password through psremoting
             }
-        } >> C:\incred.csv 
+        } # >> C:\incred.csv 
 		# & $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
 	}
     Catch {
