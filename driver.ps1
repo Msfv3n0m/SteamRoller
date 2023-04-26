@@ -172,19 +172,19 @@ function RemoveLinks ($ServersList) {
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
-	Remove-GPLink -Name "Tools" -Target $input2
+	    Remove-GPLink -Name "Tools" -Target $input2
         Remove-GPLink -Name "WinRM (unencrypted)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
-	Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
-	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
+        New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
         Remove-GPLink -Name "Tools" -Target $input2
         Remove-GPLink -Name "WinRM (unencrypted)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
-	Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
-	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
+        New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
 }
 
@@ -194,18 +194,6 @@ function StopSMBShare () {
 
 function DeleteDriver () {
 	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1"
-}
-
-function GPUpdate ($ServersList) {
-  $cd = $(pwd)
-  $ServersList | %{
-    Try {
-		& $cd\PsExec.exe \\$_ -nobanner -accepteula cmd /c gpupdate /force
-	}
-    Catch {
-    	  Write-Output "Could not access " $_
-    	}
-  }
 }
 
 GetTools
@@ -220,7 +208,6 @@ Resume
 ChangeLocalPasswords $ServersList
 RemoveLinks $ServersList
 StopSMBShare
-#GPUpdate $ServersList
 Remove-GPO -Name "NoPowerShellLogging"
 ChangeADPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
