@@ -195,7 +195,14 @@ function StopSMBShare () {
 function DeleteDriver () {
 	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1"
 }
+# Variables
+$root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)    # used in removelinks and createouanddistribute
+$cd = $(pwd)                                                                # used in changelocalpasswords, gettools
+$gpoDir = "$(pwd)\GPO"                                                      # used in importgpo1
+$domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)              # used in changeadpass
+$downloads = "$home\Downloads"                                              # used in gettools
 
+#Main
 GetTools
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
 $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)
