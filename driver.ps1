@@ -13,10 +13,10 @@
    C:\incred.csv with plaintext usernames and passwords for domain and local users
 .NOTES
    File	Name	: driver.ps1
-   Author	: Msfv3n0m
-   Requires	: GroupPolicy, ActiveDirectory, Microsoft.PowerShell.Utility, Microsoft.PowerShell.Management, Microsoft.PowerShell.Security, Microsoft.PowerShell.LocalAccounts PowerShell modules   
+   Author	    : Msfv3n0m
+   Requires	    : GroupPolicy, ActiveDirectory, Microsoft.PowerShell.Utility, Microsoft.PowerShell.Management, Microsoft.PowerShell.Security, Microsoft.PowerShell.LocalAccounts PowerShell modules   
 .LINK
-   https://github.com/Msfv3n0m/SteamRoller
+   https://github.com/Msfv3n0m/SteamRoller3
 #>
 function Resume () {
 	$input = ""
@@ -111,7 +111,7 @@ function CreateOUAndDistribute () {
         New-ADOrganizationalUnit -Name $_.Name -Path $root 
         Move-ADObject -Identity $input1 -TargetPath $input2
         New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "WinRM (unencrypted)" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
 	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -122,7 +122,7 @@ function CreateOUAndDistribute () {
         New-ADOrganizationalUnit -Name $_.Name -Path $root 
         Move-ADObject -Identity $input1 -TargetPath $input2
         New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "WinRM (unencrypted)" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
 	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -173,7 +173,7 @@ function RemoveLinks ($ServersList) {
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
 	    Remove-GPLink -Name "Tools" -Target $input2
-        Remove-GPLink -Name "WinRM (unencrypted)" -Target $input2 
+        Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
         Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
         New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -181,7 +181,7 @@ function RemoveLinks ($ServersList) {
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
         Remove-GPLink -Name "Tools" -Target $input2
-        Remove-GPLink -Name "WinRM (unencrypted)" -Target $input2 
+        Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
         Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
         New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
@@ -195,6 +195,7 @@ function StopSMBShare () {
 function DeleteDriver () {
 	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1"
 }
+
 # Variables
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)    # used in removelinks and createouanddistribute
 $cd = $(pwd)                                                                # used in changelocalpasswords, gettools, importgpo1, deletedriver, startsmbshare, replace
