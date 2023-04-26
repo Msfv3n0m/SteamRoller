@@ -197,7 +197,7 @@ function DeleteDriver () {
 }
 # Variables
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)    # used in removelinks and createouanddistribute
-$cd = $(pwd)                                                                # used in changelocalpasswords, gettools
+$cd = $(pwd)                                                                # used in changelocalpasswords, gettools, importgpo1, deletedriver, startsmbshare, replace
 $gpoDir = "$(pwd)\GPO"                                                      # used in importgpo1
 $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)              # used in changeadpass
 $downloads = "$home\Downloads"                                              # used in gettools
