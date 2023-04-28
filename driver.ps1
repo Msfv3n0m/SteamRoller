@@ -57,7 +57,7 @@ function ChangeADPass () {
     Get-ADUser -Filter * | ?{$_.Name -ne "Administrator"} | %{
     $user = $_.Name
     $pass = [System.Web.Security.Membership]::GeneratePassword(15,2)
-    Write-Output "$domain\$user,$pass" >> C:\incred.csv
+    # Write-Output "$domain\$user,$pass" >> C:\incred.csv
     Set-ADAccountPassword -Identity $_.Name -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
     $pass = $Null
   }
