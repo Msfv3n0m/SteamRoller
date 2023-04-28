@@ -53,7 +53,7 @@ function GetTools () {
 function ChangeADPass () {
     $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
     Add-Type -AssemblyName System.Web
-    Write-Output "Username,Password" > C:\incred.csv
+    Write-Output "Username,Password" # > C:\incred.csv
     Get-ADUser -Filter * | ?{$_.Name -ne "Administrator"} | %{
     $user = $_.Name
     $pass = [System.Web.Security.Membership]::GeneratePassword(15,2)
@@ -108,24 +108,29 @@ function CreateOUAndDistribute () {
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",CN=Computers," + $root
 	$input2 = "OU=" + $_.Name + "," + $root
-        New-ADOrganizationalUnit -Name $_.Name -Path $root 
-        Move-ADObject -Identity $input1 -TargetPath $input2
-        New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-ADOrganizationalUnit -Name $_.Name -Path $root 
+    Move-ADObject -Identity $input1 -TargetPath $input2
+    New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
+	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
+
     }
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
 	$input2 = "OU=" + $_.Name + "," + $root
-        New-ADOrganizationalUnit -Name $_.Name -Path $root 
-        Move-ADObject -Identity $input1 -TargetPath $input2
-        New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
-        New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-	New-GPLink -Name "NoPowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-ADOrganizationalUnit -Name $_.Name -Path $root 
+    Move-ADObject -Identity $input1 -TargetPath $input2
+    New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
+	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
+    New-GPLink -Name "ADDS (LDAP)" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
 }
 
@@ -185,16 +190,12 @@ function RemoveLinks ($ServersList) {
 	    Remove-GPLink -Name "Tools" -Target $input2
         Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
-        Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
-        New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
         Remove-GPLink -Name "Tools" -Target $input2
         Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
-        Remove-GPLink -Name "NoPowerShellLogging" -Target $input2
-        New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
 }
 
