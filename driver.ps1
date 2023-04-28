@@ -165,7 +165,7 @@ function ChangeLocalPasswords ($ServersList) {
             Try {
                 Add-Type -AssemblyName System.Web
                 Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
-                    $pass=[System.Web.Security.Membership]::GeneratePassword(20,2)
+                    $pass=[System.Web.Security.Membership]::GeneratePassword(15,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
                     # Write-Output "$h\$_.Name,$pass"
                     $pass = $Null
@@ -215,7 +215,7 @@ $gpoDir = "$(pwd)\GPO"                                                      # us
 $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)              # used in changeadpass
 $downloads = "$home\Downloads"                                              # used in gettools
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-$ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)
+$ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)     # used in createouanddistribute, removelinks, changelocalpasswords
 
 GetTools
 Replace 
