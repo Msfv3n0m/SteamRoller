@@ -2,7 +2,7 @@
 .Synopsis
    Execute command on the entire domain
 .DESCRIPTION
-   Finds all Windows computers in the domain and executes a command 
+   Uses the servers.txt output from driver.ps1 to keep track of hosts to PSRemote into
 .EXAMPLE
    & invoke-massadministration.ps1 "hostname"
 .INPUTS
@@ -21,6 +21,9 @@ Param (
     [String]$cmd        # command to be executed
 )
 
+function GetServers () {
+
+}
 function RunCommand ($ServersList, $cmd) {
     $ServersList | %{
         Write-Host "Attempting to change passwords on $_" -ForegroundColor Green 
@@ -43,7 +46,6 @@ function ChangeAdminPass () {
 
 # Main
 # Vars
-$root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-$ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)     # used in createouanddistribute, removelinks, changelocalpasswords
+$ServersList = Get-Content -Path "$(pwd)\servers.txt"
 # Logic
 RunCommand ($ServersList, $cmd)

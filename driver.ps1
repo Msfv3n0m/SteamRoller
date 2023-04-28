@@ -233,7 +233,7 @@ $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)              # us
 $downloads = "$home\Downloads"                                              # used in gettools
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
 $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)     # used in createouanddistribute, removelinks, changelocalpasswords
-
+Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} | Select -ExpandProperty Name >> servers.txt
 GetTools
 Replace 
 ImportGPO1 
