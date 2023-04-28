@@ -154,7 +154,7 @@ function StartSMBShare () {
 
 function ChangeLocalPasswords ($ServersList) {
   $cd = $(pwd)
-  $newPass="Chiapet1"
+  $newPass="Superchiapet1"
   $cmdCommand1 = @"
   for /f "skip=1" %a in ('net user') do net user %a $newPass 
 "@ # > null
