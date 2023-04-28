@@ -53,7 +53,7 @@ function GetTools () {
 function ChangeADPass () {
     $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
     Add-Type -AssemblyName System.Web
-    Write-Output "Username,Password" # > C:\incred.csv
+    # Write-Output "Username,Password" > C:\incred.csv
     Get-ADUser -Filter * | ?{$_.Name -ne "Administrator"} | %{
     $user = $_.Name
     $pass = [System.Web.Security.Membership]::GeneratePassword(15,2)
@@ -227,7 +227,6 @@ Resume
 ChangeLocalPasswords $ServersList
 RemoveLinks $ServersList
 StopSMBShare
-Remove-GPO -Name "NoPowerShellLogging"
 ChangeADPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 DeleteDriver
