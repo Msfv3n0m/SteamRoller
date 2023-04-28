@@ -160,8 +160,8 @@ function ChangeLocalPasswords ($ServersList) {
 "@ # > null
   $ServersList | %{
     Try {
-        Invoke-Command -ComputerName $_ -ArgumentList $h,$cmdCommand -ScriptBlock {
-            Param($h,$cmdCommand)
+        Invoke-Command -ComputerName $_ -ArgumentList $cmdCommand -ScriptBlock {
+            Param($cmdCommand)
             Try {
                 Add-Type -AssemblyName System.Web
                 Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
