@@ -51,6 +51,7 @@ function GetTools () {
 }
 
 function ChangeADPass () {
+    Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
     $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
     Add-Type -AssemblyName System.Web
     # Write-Output "Username,Password" > C:\incred.csv
@@ -229,7 +230,9 @@ CreateOUAndDistribute
 StartSMBShare 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 Resume
-ChangeLocalPasswords $ServersList
+if ($ServersList -ne $Null) {
+    ChangeLocalPasswords $ServersList
+}
 RemoveLinks $ServersList
 StopSMBShare
 ChangeADPass
