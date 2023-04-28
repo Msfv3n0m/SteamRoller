@@ -28,6 +28,7 @@ function Resume () {
 }
 
 function GetTools () {
+    Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 	$cd = $(pwd)
 	$downloads = "$home\Downloads"
 	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
@@ -35,7 +36,6 @@ function GetTools () {
 	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     if (Test-Path $downloads\Sysinternals\) {
-        Copy-Item $downloads\Sysinternals\PSExec.exe $cd
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd
         Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
@@ -88,7 +88,7 @@ function ImportGPO1 () {
 <#
 This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
 #>
-    Write-Host "Importing GPOs..."
+    Write-Host "Importing GPOs" -ForegroundColor Green
     $GpoMap = ImportGPO2("$(pwd)\GPO")
     #Write-Host "Importing the following GPOs:"
     #Write-Host
@@ -105,6 +105,7 @@ This function is a derivative of a script found in Microsoft's Security Complian
 }
 
 function CreateOUAndDistribute () {
+    Write-Host "Creating OUs and Distributing Computers" -ForegroundColor Green
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",CN=Computers," + $root
@@ -136,6 +137,7 @@ function CreateOUAndDistribute () {
 }
 
 function Replace () {
+    Write-Host "Inserting DC Name into GPOs" -ForegroundColor Green
     Get-ChildItem "$(pwd)\GPO\" | %{
         $path1 = $_.FullName + "\gpreport.xml"
 	if (Test-Path -Path $path1 -PathType Leaf) {
@@ -149,17 +151,20 @@ function Replace () {
 }
 
 function StartSMBShare () {
+    Write-Host "Starting SMB Share" -ForegroundColor Green
     net share SharingIsCaring="$(pwd)\SharingIsCaring"
     icacls.exe "$(pwd)\SharingIsCaring" /inheritancelevel:e /grant "*S-1-5-11:(OI)(CI)(R)" #grant acess to authenticated users
 }
 
 function ChangeLocalPasswords ($ServersList) {
+  Write-Host "Changing local passwords" -ForegroundColor Green
   $cd = $(pwd)
   $newPass="Superchiapet1"
   $cmdCommand1 = @"
   for /f "skip=1" %a in ('net user') do net user %a $newPass 
 "@ # > null
   $ServersList | %{
+    Write-Host "Attempting to change passwords on $_" -ForegroundColor Green 
     Try {
         Invoke-Command -ComputerName $_ -ArgumentList $cmdCommand -ScriptBlock {
             Param($cmdCommand)
@@ -171,9 +176,11 @@ function ChangeLocalPasswords ($ServersList) {
                     # Write-Output "$h\$_.Name,$pass"
                     $pass = $Null
                 }
+                Write-Host "Passwords randomized on $_" -ForegroundColor Green
             }
             Catch {
                 cmd /c $cmdCommand          # pass contingency password through psremoting
+                Write-Host "Static password set for all users on $_" -ForegroundColor Green
             }
         } # >> C:\incred.csv 
 		# & $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
@@ -185,6 +192,7 @@ function ChangeLocalPasswords ($ServersList) {
 }
 
 function RemoveLinks ($ServersList) {
+    Write-Host "Removing GPO links" -ForegroundColor Green
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
@@ -201,16 +209,19 @@ function RemoveLinks ($ServersList) {
 }
 
 function ChangeAdminPass () {
+    Write-Host "Setting a new administrator password" -ForegroundColor Yellow
     $newPass Read-Host "Please set a new password for $(whoami):" -AsSecureString
     Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
 }
 
 function StopSMBShare () {
+    Write-Host "Deleting SMB Share" -ForegroundColor Green
   net share SharingIsCaring /del /yes
 }
 
 function DeleteDriver () {
-	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1"
+    Write-Host "Deleting driver.ps1" -ForegroundColor Green
+	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1" > $Null
 }
 
 # Main
