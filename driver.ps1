@@ -54,7 +54,7 @@ function ChangeADPass () {
     $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
     Add-Type -AssemblyName System.Web
     # Write-Output "Username,Password" > C:\incred.csv
-    Get-ADUser -Filter * | ?{$_.Name -ne "Administrator"} | %{
+    Get-ADUser -Filter * | ?{$_.Name -ne $env:username} | %{
     $user = $_.Name
     $pass = [System.Web.Security.Membership]::GeneratePassword(15,2)
     # Write-Output "$domain\$user,$pass" >> C:\incred.csv
@@ -199,6 +199,11 @@ function RemoveLinks ($ServersList) {
     }
 }
 
+function ChangeAdminPass () {
+    $newPass Read-Host "Please set a new password for $(whoami):" -AsSecureString
+    Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
+}
+
 function StopSMBShare () {
   net share SharingIsCaring /del /yes
 }
@@ -228,5 +233,6 @@ ChangeLocalPasswords $ServersList
 RemoveLinks $ServersList
 StopSMBShare
 ChangeADPass
+ChangeAdminPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 DeleteDriver
