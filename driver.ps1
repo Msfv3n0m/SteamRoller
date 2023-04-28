@@ -165,10 +165,10 @@ function ChangeLocalPasswords ($ServersList) {
             Try {
                 Add-Type -AssemblyName System.Web
                 Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
-                        $pass=[System.Web.Security.Membership]::GeneratePassword(20,2)
-                        Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
-                        # Write-Output "$h\$_.Name,$pass"
-                        $pass = $Null
+                    $pass=[System.Web.Security.Membership]::GeneratePassword(20,2)
+                    Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
+                    # Write-Output "$h\$_.Name,$pass"
+                    $pass = $Null
                 }
             }
             Catch {
