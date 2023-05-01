@@ -116,7 +116,6 @@ function CreateOUAndDistribute () {
     New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
 
     }
@@ -129,7 +128,6 @@ function CreateOUAndDistribute () {
     New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-	New-GPLink -Name "PowerShellLogging" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "ADDS (LDAP)" -Target $input2 -LinkEnabled Yes -Enforced Yes
