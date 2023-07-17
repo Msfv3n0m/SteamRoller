@@ -200,7 +200,6 @@ function GPUpdate ($ServersList) {
 }
 
 GetTools
-ChangeADPass
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
 $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)
 Replace 
@@ -215,4 +214,5 @@ StopSMBShare
 #GPUpdate $ServersList
 Remove-GPO -Name "NoPowerShellLogging"
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
+ChangeADPass
 DeleteDriver
