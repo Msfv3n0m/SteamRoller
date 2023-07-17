@@ -7,7 +7,9 @@ This project is made for the purpose of automating basic security configurations
 3. Mass-distribution of system administration tools
 4. Domain-wide password changes for local and domain users
 
-SteamRoller3 **DOES NOT INCLUDE ANY EXTERNAL TOOLS**. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), [BlueSpawn](https://github.com/ION28/BLUESPAWN), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly.
+SteamRoller3 **DOES NOT INCLUDE ANY EXTERNAL TOOLS**. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), [BlueSpawn](https://github.com/ION28/BLUESPAWN), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly. </br>
+
+For more information, visit the [wiki](https://github.com/Msfv3n0m/SteamRoller/wiki)!
 
 ## Table of Contents
 - [SteamRoller3](#steamroller3)
