@@ -48,8 +48,8 @@ This section follows a pseudo-chronological mid-level walkthrough of this projec
 - The SMB Share is started
 - The program pauses to allow a manual "gpupdate /force" on each computer in the domain
 - Sysmon is installed on each member of the domain 
-- General, NoPowerShellLogging, and SMB GPOs are applied to all CLIENT computers in the domain to allow for the next step to occur securely
-- PSExec - a tool from Mark Russinovich's Sysinternals - is used to change the passwords for local users on each CLIENT computer in the domain. The new credentials are compiled into the C:\incred.csv file on the domain controller in plaintext.
+- General, NoPowerShellLogging, and WinRM GPOs are applied to all CLIENT computers in the domain to allow for the next step to occur securely
+- PSRemoting is used to change the passwords for local users on each CLIENT computer in the domain. The new credentials are compiled into the C:\incred.csv file on the domain controller in plaintext.
   - This method does not store the domain administrator credentials in memory on the client computers because the login is of type 3 (credentials are only stored on type 2 logins)
   - PowerShell logging is disabled via GPO to prevent logs showing the users and their new passwords
   - The passwords are randomly generated and stored in a variable to prevent the password from showing up in PowerShell history
