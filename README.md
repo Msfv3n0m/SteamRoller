@@ -12,7 +12,7 @@ SteamRoller **DOES NOT INCLUDE ANY EXTERNAL TOOLS**. Because of this, it will in
 For more information, visit the [wiki](https://github.com/Msfv3n0m/SteamRoller/wiki)
 
 ## Table of Contents
-- [SteamRoller](#steamroller3)
+- [SteamRoller](#steamroller)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
   - [Process Description](#process-description)
