@@ -16,10 +16,6 @@ For more information, visit the [wiki](https://github.com/Msfv3n0m/SteamRoller/w
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
   - [Process Description](#process-description)
-  - [Future Development](#future-development)
-    - [ADDS (LDAP)](#adds-ldap-1)
-    - [General](#general-1)
-    - [Tools](#tools-1)
   - [References](#references)
   - [Recommended Offline Additions](#recommended-offline-additions)
 
