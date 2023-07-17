@@ -7,12 +7,12 @@ This project is made for the purpose of automating basic security configurations
 3. Mass-distribution of system administration tools
 4. Domain-wide password changes for local and domain users
 
-SteamRoller3 **DOES NOT INCLUDE ANY EXTERNAL TOOLS**. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), [BlueSpawn](https://github.com/ION28/BLUESPAWN), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly. </br>
+SteamRoller **DOES NOT INCLUDE ANY EXTERNAL TOOLS**. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), [BlueSpawn](https://github.com/ION28/BLUESPAWN), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly. </br>
 
 For more information, visit the [wiki](https://github.com/Msfv3n0m/SteamRoller/wiki)!
 
 ## Table of Contents
-- [SteamRoller3](#steamroller3)
+- [SteamRoller](#steamroller)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
   - [Process Description](#process-description)
@@ -35,7 +35,7 @@ Or
 ```
 Launch start.bat or driver.ps1 as an administrator. This can be achieved by right clicking the program and selecting "Start as an administrator." Or you can run the program with an elevated Command Prompt / PowerShell console using the appropriate command above.
 
-![](https://github.com/Msfv3n0m/SteamRoller3/blob/main/SteamRoller1.png)
+![](https://github.com/Msfv3n0m/SteamRoller/blob/main/SteamRoller1.png)
 
 ## Process Description
 This section follows a pseudo-chronological mid-level walkthrough of this project 
