@@ -176,7 +176,7 @@ function ChangeLocalPasswords ($ServersList) {
                     # Write-Output "$(hostname)\$_,$pass"
                     $pass = $Null
                 }
-                Write-Host "Passwords randomized on $(hostname)" -ForegroundColor Green          # <---- computer name does not print
+                Write-Host "Passwords randomized on $(hostname)" -ForegroundColor Green         
             }
             Catch {
                 cmd /c $cmdCommand          # pass contingency password through psremoting
