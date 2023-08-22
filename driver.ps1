@@ -156,6 +156,8 @@ function StartSMBShare () {
 
 function ChangeLocalPasswords ($ServersList) {
   Write-Host "Changing local passwords" -ForegroundColor Green
+  Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
+  $admin = Read-Host 
   $cd = $(pwd)
   $newPass="Superchiapet1"
   $cmdCommand1 = @"
@@ -168,7 +170,7 @@ function ChangeLocalPasswords ($ServersList) {
             Param($cmdCommand)
             Try {
                 Add-Type -AssemblyName System.Web
-                Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
+                Get-LocalUser | ?{$_.Name -ne $admin} | %{
                     $pass=[System.Web.Security.Membership]::GeneratePassword(15,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
                     # Write-Output "$(hostname)\$_.Name,$pass"
@@ -239,9 +241,7 @@ CreateOUAndDistribute
 StartSMBShare 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 Resume
-if ($ServersList -ne $Null) {
-    ChangeLocalPasswords $ServersList
-}
+ChangeLocalPasswords $ServersList
 RemoveLinks $ServersList
 StopSMBShare
 ChangeADPass
