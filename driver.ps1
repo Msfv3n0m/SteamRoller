@@ -156,7 +156,7 @@ function StartSMBShare () {
 
 function ChangeLocalPasswords ($ServersList) {
   Write-Host "Changing local passwords" -ForegroundColor Green
-  Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
+  Write-Host "What is the name of an administrator present on each Windows System? (Capitalization Matters!)" -ForegroundColor Yellow
   $admin = Read-Host 
   $cd = $(pwd)
   $newPass="Superchiapet1"
@@ -170,13 +170,13 @@ function ChangeLocalPasswords ($ServersList) {
             Param($cmdCommand)
             Try {
                 Add-Type -AssemblyName System.Web
-                Get-LocalUser | ?{$_.Name -ne $admin} | %{
+                Get-LocalUser | ?{$_.Name -ne $admin} | %{                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(15,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
-                    # Write-Output "$(hostname)\$_.Name,$pass"
+                    # Write-Output "$(hostname)\$_,$pass"
                     $pass = $Null
                 }
-                Write-Host "Passwords randomized on $_" -ForegroundColor Green
+                Write-Host "Passwords randomized on $(hostname)" -ForegroundColor Green          # <---- computer name does not print
             }
             Catch {
                 cmd /c $cmdCommand          # pass contingency password through psremoting
@@ -210,7 +210,7 @@ function RemoveLinks ($ServersList) {
 
 function ChangeAdminPass () {
     Write-Host "Setting a new administrator password" -ForegroundColor Yellow
-    $newPass Read-Host "Please set a new password for $(whoami):" -AsSecureString
+    $newPass = Read-Host "Please set a new password for $(whoami)" -AsSecureString
     Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
 }
 
