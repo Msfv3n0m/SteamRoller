@@ -171,7 +171,7 @@ function ChangeLocalPasswords ($ServersList) {
                 Get-LocalUser | ?{$_.Name -ne 'Administrator'} | %{
                     $pass=[System.Web.Security.Membership]::GeneratePassword(15,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
-                    # Write-Output "$h\$_.Name,$pass"
+                    # Write-Output "$(hostname)\$_.Name,$pass"
                     $pass = $Null
                 }
                 Write-Host "Passwords randomized on $_" -ForegroundColor Green
