@@ -166,8 +166,8 @@ function ChangeLocalPasswords ($ServersList) {
   $ServersList | %{
     Write-Host "Attempting to change passwords on $_" -ForegroundColor Green 
     Try {
-        Invoke-Command -ComputerName $_ -ArgumentList $cmdCommand -ScriptBlock {
-            Param($cmdCommand)
+        Invoke-Command -ComputerName $_ -ArgumentList $cmdCommand, $admin -ScriptBlock {
+            Param($cmdCommand, $admin)
             Try {
                 Add-Type -AssemblyName System.Web
                 Get-LocalUser | ?{$_.Name -ne $admin} | %{                           
