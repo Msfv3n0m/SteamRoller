@@ -224,6 +224,7 @@ function DeleteDriver () {
 	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1" > $Null
 }
 
+
 # Main
 # Variables
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)    # used in removelinks and createouanddistribute
@@ -231,6 +232,7 @@ $cd = $(pwd)                                                                # us
 $gpoDir = "$(pwd)\GPO"                                                      # used in importgpo1
 $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)              # used in changeadpass
 $downloads = "$home\Downloads"                                              # used in gettools
+
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
 $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)     # used in createouanddistribute, removelinks, changelocalpasswords
 Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} | Select -ExpandProperty Name >> servers.txt
@@ -247,4 +249,5 @@ StopSMBShare
 ChangeADPass
 ChangeAdminPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
+ChangeADPass
 DeleteDriver
