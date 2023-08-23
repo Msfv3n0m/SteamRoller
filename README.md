@@ -9,15 +9,20 @@ This project is made for the purpose of automating basic security configurations
 
 SteamRoller **DOES NOT INCLUDE ANY EXTERNAL TOOLS**. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), [BlueSpawn](https://github.com/ION28/BLUESPAWN), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly. </br>
 
+
 For more information, visit the [wiki](https://github.com/Msfv3n0m/SteamRoller/wiki)
+
 
 ## Table of Contents
 - [SteamRoller](#steamroller)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
   - [Process Description](#process-description)
-  - [References](#references)
-  - [Recommended Offline Additions](#recommended-offline-additions)
+
+  - [Future Development](#future-development)
+    - [ADDS (LDAP)](#adds-ldap-1)
+    - [General](#general-1)
+    - [Tools](#tools-1)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -31,7 +36,11 @@ Or
 ```
 Launch start.bat or driver.ps1 as an administrator. This can be achieved by right clicking the program and selecting "Start as an administrator." Or you can run the program with an elevated Command Prompt / PowerShell console using the appropriate command above.
 
+
 ![](https://github.com/Msfv3n0m/SteamRoller/blob/main/SteamRoller.png)
+
+
+
 
 ## Process Description
 This section follows a pseudo-chronological mid-level walkthrough of this project 
