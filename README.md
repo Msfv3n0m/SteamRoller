@@ -9,19 +9,20 @@ This project is made for the purpose of automating basic security configurations
 
 SteamRoller **DOES NOT INCLUDE ANY EXTERNAL TOOLS**. Because of this, it will internally attempt to find and import popular system administration tools such as the [Sysinternals Suite](https://learn.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite), [Process Hacker](https://sourceforge.net/projects/processhacker/), [BlueSpawn](https://github.com/ION28/BLUESPAWN), and [Hollows_Hunter](https://github.com/hasherezade/hollows_hunter). It does require Sysinternals to be at least downloaded in order for this program to run properly. </br>
 
-For more information, visit the [wiki](https://github.com/Msfv3n0m/SteamRoller/wiki)!
+
+For more information, visit the [wiki](https://github.com/Msfv3n0m/SteamRoller/wiki)
+
 
 ## Table of Contents
 - [SteamRoller](#steamroller)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
   - [Process Description](#process-description)
+
   - [Future Development](#future-development)
     - [ADDS (LDAP)](#adds-ldap-1)
     - [General](#general-1)
     - [Tools](#tools-1)
-  - [References](#references)
-  - [Recommended Offline Additions](#recommended-offline-additions)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -35,7 +36,11 @@ Or
 ```
 Launch start.bat or driver.ps1 as an administrator. This can be achieved by right clicking the program and selecting "Start as an administrator." Or you can run the program with an elevated Command Prompt / PowerShell console using the appropriate command above.
 
-![](https://github.com/Msfv3n0m/SteamRoller/blob/main/SteamRoller1.png)
+
+![](https://github.com/Msfv3n0m/SteamRoller/blob/main/SteamRoller.png)
+
+
+
 
 ## Process Description
 This section follows a pseudo-chronological mid-level walkthrough of this project 
@@ -48,8 +53,8 @@ This section follows a pseudo-chronological mid-level walkthrough of this projec
 - The SMB Share is started
 - The program pauses to allow a manual "gpupdate /force" on each computer in the domain
 - Sysmon is installed on each member of the domain 
-- General, NoPowerShellLogging, and SMB GPOs are applied to all CLIENT computers in the domain to allow for the next step to occur securely
-- PSExec - a tool from Mark Russinovich's Sysinternals - is used to change the passwords for local users on each CLIENT computer in the domain. The new credentials are compiled into the C:\incred.csv file on the domain controller in plaintext.
+- General, NoPowerShellLogging, and WinRM GPOs are applied to all CLIENT computers in the domain to allow for the next step to occur securely
+- PSRemoting is used to change the passwords for local users on each CLIENT computer in the domain. The new credentials are compiled into the C:\incred.csv file on the domain controller in plaintext.
   - This method does not store the domain administrator credentials in memory on the client computers because the login is of type 3 (credentials are only stored on type 2 logins)
   - PowerShell logging is disabled via GPO to prevent logs showing the users and their new passwords
   - The passwords are randomly generated and stored in a variable to prevent the password from showing up in PowerShell history
