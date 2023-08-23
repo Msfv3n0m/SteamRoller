@@ -156,7 +156,7 @@ function StartSMBShare () {
 
 function ChangeLocalPasswords ($ServersList) {
   Write-Host "Changing local passwords" -ForegroundColor Green
-  Write-Host "What is the name of an administrator present on each Windows System? (Capitalization Matters!)" -ForegroundColor Yellow
+  Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
   $admin = Read-Host 
   $cd = $(pwd)
   $newPass="Superchiapet1"
