@@ -31,7 +31,10 @@ function GetTools () {
     Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 	$cd = $(pwd)
 	$downloads = "$home\Downloads"
-	gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals}
+    if !(Test-Path $downloads\Sysinternals)
+    {
+	    gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
+    }
 	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
 	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
@@ -192,25 +195,29 @@ function ChangeLocalPasswords ($ServersList) {
 }
 function RemoveFirewallRules($ServersList, $DCList) {
     Write-Host "Blocking default inbound and outbound traffic" -ForegroundColor Green
-    $ServersList| %{
-        Invoke-Command -ComputerName $_ -ArgumentList $cmdCommand, $admin -ScriptBlock {
-            Param($Command)
-            Try {
-                netsh advfirewall firewall set rule all new enable=no 
-            }
-            Catch {
-                Write-Host "Could not block default inbound and outbound traffic on $_" -ForegroundColor Red
+    if ($ServersList -ne $Null)
+    {
+        $ServersList| %{
+            Invoke-Command -ComputerName $_ -ScriptBlock {
+                Try {
+                    netsh advfirewall firewall set rule all new enable=no 
+                }
+                Catch {
+                    Write-Host "Could not block default inbound and outbound traffic on $_" -ForegroundColor Red
+                }
             }
         }
     }
+    if ($ServersList -ne $Null)
+    {
     $DCList| %{
-        Invoke-Command -ComputerName $_ -ArgumentList $cmdCommand, $admin -ScriptBlock {
-            Param($Command)
-            Try {
-                netsh advfirewall firewall set rule all new enable=no 
-            }
-            Catch {
-                Write-Host "Could not block default inbound and outbound traffic on $_" -ForegroundColor Red
+            Invoke-Command -ComputerName $_ -ScriptBlock {
+                Try {
+                    netsh advfirewall firewall set rule all new enable=no 
+                }
+                Catch {
+                    Write-Host "Could not block default inbound and outbound traffic on $_" -ForegroundColor Red
+                }
             }
         }
     }
