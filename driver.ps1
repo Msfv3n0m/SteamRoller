@@ -196,7 +196,7 @@ function RemoveLinks ($ServersList) {
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
         $input2 = "OU=" + $_.Name + "," + $root
-	    Remove-GPLink -Name "Tools" -Target $input2
+	Remove-GPLink -Name "Tools" -Target $input2
         Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
     }
