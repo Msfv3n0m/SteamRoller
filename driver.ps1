@@ -209,7 +209,8 @@ function FirewallDefaultActionBlock($ServersList, $DCList) {
             Param($Command)
             Try {
                 netsh advfirewall firewall set rule all new enable=no 
-                netsh advfirewall firewall set allprofiles firewallpolicy blockinbound,blockoutbound
+                # netsh advfirewall firewall set allprofiles firewallpolicy blockinbound,blockoutbound
+                netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
             }
             Catch {
                 Write-Host "Could not block default inbound and outbound traffic on $_" -ForegroundColor Red
