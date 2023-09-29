@@ -190,14 +190,13 @@ function ChangeLocalPasswords ($ServersList) {
     	}
   }
 }
-function FirewallDefaultActionBlock($ServersList, $DCList) {
+function RemoveFirewallRules($ServersList, $DCList) {
     Write-Host "Blocking default inbound and outbound traffic" -ForegroundColor Green
     $ServersList| %{
         Invoke-Command -ComputerName $_ -ArgumentList $cmdCommand, $admin -ScriptBlock {
             Param($Command)
             Try {
                 netsh advfirewall firewall set rule all new enable=no 
-                netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
             }
             Catch {
                 Write-Host "Could not block default inbound and outbound traffic on $_" -ForegroundColor Red
@@ -209,7 +208,6 @@ function FirewallDefaultActionBlock($ServersList, $DCList) {
             Param($Command)
             Try {
                 netsh advfirewall firewall set rule all new enable=no 
-                netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
             }
             Catch {
                 Write-Host "Could not block default inbound and outbound traffic on $_" -ForegroundColor Red
@@ -275,7 +273,7 @@ StartSMBShare
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 Resume
 ChangeLocalPasswords $ServersList.Name
-FirewallDefaultActionBlock $ServersList.Name $DCList.Name
+RemoveFirewallRules $ServersList.Name $DCList.Name
 RemoveLinks $ServersList $DCList
 StopSMBShare
 ChangeADPass
