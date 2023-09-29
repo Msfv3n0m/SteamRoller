@@ -191,16 +191,16 @@ function ChangeLocalPasswords ($ServersList) {
   }
 }
 
-function RemoveLinks ($ServersList) {
+function RemoveLinks ($ServersList, $DCList) {
     Write-Host "Removing GPO links" -ForegroundColor Green
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
+    $ServersList| %{
         $input2 = "OU=" + $_.Name + "," + $root
 	    Remove-GPLink -Name "Tools" -Target $input2
         Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
     }
-    Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
+    $DCList | %{
         $input2 = "OU=" + $_.Name + "," + $root
         Remove-GPLink -Name "Tools" -Target $input2
         Remove-GPLink -Name "WinRM (http)" -Target $input2 
@@ -234,8 +234,12 @@ $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)              # us
 $downloads = "$home\Downloads"                                              # used in gettools
 
 $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-$ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | Select -ExpandProperty Name)     # used in createouanddistribute, removelinks, changelocalpasswords
-Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} | Select -ExpandProperty Name >> servers.txt
+$ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root")     # used in createouanddistribute, removelinks, changelocalpasswords
+$DCList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root")     # used in createouanddistribute, removelinks, changelocalpasswords
+
+$ServersList | Select -ExpandProperty Name >> servers.txt
+$DCList | Select -ExpandProperty Name >> servers.txt
+
 GetTools
 Replace 
 ImportGPO1 
@@ -243,8 +247,8 @@ CreateOUAndDistribute
 StartSMBShare 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 Resume
-ChangeLocalPasswords $ServersList
-RemoveLinks $ServersList
+ChangeLocalPasswords $ServersList.Name
+RemoveLinks $ServersList $DCList
 StopSMBShare
 ChangeADPass
 ChangeAdminPass
