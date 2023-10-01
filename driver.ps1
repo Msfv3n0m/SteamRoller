@@ -284,8 +284,10 @@ if ($boolInput)
 {
     $filePath = Read-Host "What is the filepath/name you want to store the passwords in? "
 }
-
-$output = ChangeLocalPasswords $ServersList.Name
+if ($ServersList.Name -ne $Null)
+{
+    $output = ChangeLocalPasswords $ServersList.Name
+}
 if ($boolInput)
 {
     $output | Out-File -FilePath $filePath -Append
