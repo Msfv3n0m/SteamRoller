@@ -173,7 +173,7 @@ function ChangeLocalPasswords ($ServersList) {
                 Get-LocalUser | ?{$_.Name -ne $admin} | %{                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(15,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
-                    # Write-Output "$(hostname)\$_,$pass"
+                    Write-Output "$(hostname)\$_,$pass"
                     $pass = $Null
                 }
                 Write-Host "Passwords randomized on $(hostname)" -ForegroundColor Green         
@@ -190,6 +190,7 @@ function ChangeLocalPasswords ($ServersList) {
     	}
   }
 }
+
 function RemoveFirewallRules($ServersList, $DCList) {
     Write-Host "Blocking default inbound and outbound traffic" -ForegroundColor Green
     if ($ServersList -ne $Null)
@@ -276,11 +277,28 @@ CreateOUAndDistribute
 StartSMBShare 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 Resume
-ChangeLocalPasswords $ServersList.Name
+
+$input = Read-Host "Enter 'true' or 'false'"
+$boolInput = [bool]$input 
+if ($boolInput)
+{
+    $filePath = Read-Host "What is the filepath/name you want to store the passwords in? "
+}
+
+$output = ChangeLocalPasswords $ServersList.Name
+if ($boolInput)
+{
+    $output | Out-File -FilePath $filePath -Append
+}
+$output = $Null
 RemoveFirewallRules $ServersList.Name $DCList.Name
 RemoveLinks $ServersList $DCList
 StopSMBShare
-ChangeADPass
+$output = ChangeADPass
+if ($boolInput)
+{
+    $output | Out-File -FilePath $filePath -Append
+}
 ChangeAdminPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 ChangeADPass
