@@ -277,8 +277,8 @@ CreateOUAndDistribute
 StartSMBShare 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 Resume
-
-$input = Read-Host "Enter 'true' or 'false'"
+Write-Host "You want to output a file of the randomly generated passwords"
+$input = Read-Host "Is the above statement 'true' or 'false'"
 $boolInput = [bool]$input 
 if ($boolInput)
 {
