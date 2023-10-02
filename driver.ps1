@@ -283,7 +283,7 @@ $boolInput = [bool]$input
 if ($boolInput)
 {
     $filePath = Read-Host "What is the filepath/name you want to store the passwords in? "
-    Write-Host "Username,Password" > $filepath
+    Write-Output "Username,Password" > $filepath
 }
 if ($ServersList.Name -ne $Null)
 {
