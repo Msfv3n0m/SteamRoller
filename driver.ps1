@@ -58,7 +58,7 @@ function ChangeADPass () {
     Get-ADUser -Filter * | ?{$_.Name -ne $env:username} | %{
     $user = $_.Name
     $pass = [System.Web.Security.Membership]::GeneratePassword(15,2)
-    Write-Host "$domain\$user,$pass"
+    Write-Output "$domain\$user,$pass"
     Set-ADAccountPassword -Identity $_.Name -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
     $pass = $Null
   }
@@ -301,6 +301,7 @@ if ($boolInput)
 {
     $output | Out-File -FilePath $filePath -Append
 }
+$output = $Null
 ChangeAdminPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 ChangeADPass
