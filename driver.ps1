@@ -252,6 +252,7 @@ function StopSMBShare () {
 function DeleteDriver () {
     Write-Host "Deleting driver.ps1" -ForegroundColor Green
 	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1" > $Null
+    & "$(pwd)\sdelete.exe" -accepteula -p 3 "$env:home\Downloads\*Steamroller*.zip" > $Null
 }
 
 
