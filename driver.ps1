@@ -266,9 +266,9 @@ $ServersList | Select -ExpandProperty Name >> servers.txt
 $DCList | Select -ExpandProperty Name >> servers.txt
 
 $job1 = Start-Job -ScriptBlock {
-    cd $cd
+    param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
-}
+} -ArgumentList $downloads
 
 while ($boolInput -eq $Null)
 {
@@ -299,23 +299,19 @@ if ($boolInput)
 $job1 | Wait-Job
 GetTools $cd $downloads
 $job2 = Start-Job -ScriptBlock{
-    cd $cd
+    param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
-}
+} -ArgumentList $cd
 $job3 = Start-Job -ScriptBlock{
-    cd $cd
     Replace
 }
 $job4 = Start-Job -ScriptBlock{
-    cd $cd
     ImportGPO1
 }
 $job5 = Start-Job -ScriptBlock{
-    cd $cd
     CreateOUAndDistribute
 }
 $job6 = Start-Job -ScriptBlock{
-    cd $cd
     StartSMBShare
 }
 $job2 | Wait-Job
@@ -328,7 +324,7 @@ Write-Host "`nManually upate the group policy configuration on each member in th
 gpupdate /force
 Resume
 $job7 = Start-Job -ScriptBlock {
-    cd $cd
+    param($ServersList, $filePathLocal)
     if ($ServersList.Name -ne $Null)
     {
         $output = ChangeLocalPasswords $ServersList.Name $cd
@@ -338,16 +334,15 @@ $job7 = Start-Job -ScriptBlock {
         $output | Out-File -FilePath $filePathLocal -Append
     }
     $output = $Null
-}
+} -ArgumentList $ServersList, $filePathLocal
 $job8 = Start-Job -ScriptBlock{
-    cd $cd
     $output = ChangeADPass
     if ($boolInput)
     {
         $output | Out-File -FilePath $filePathAD -Append
     }
     $output = $Null
-}
+} -ArgumentList $filePathAD
 while ($job7.State -eq 'Running')
 {
     $job7output = Receive-Job $job7 
