@@ -46,27 +46,27 @@ function GetTools ($cd, $downloads) {
 	Resume
 }
 
-$init = {
+
 function ImportGPO2 ([String]$rootdir,[switch]$formatOutput) {
     <#
     This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
     #>
-        $results = New-Object System.Collections.SortedList
-        Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
-            $guid = $_.Directory.Name
-            $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
-            $results.Add($displayName, $guid)
-        }
-        if ($formatOutput)
-        {
-            $results | Format-Table -AutoSize
-        }
-        else
-        {
-            $results
-        }
+    $results = New-Object System.Collections.SortedList
+    Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
+        $guid = $_.Directory.Name
+        $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
+        $results.Add($displayName, $guid)
+    }
+    if ($formatOutput)
+    {
+        $results | Format-Table -AutoSize
+    }
+    else
+    {
+        $results
     }
 }
+
 
 
 function ImportGPO1 ($cd) {
