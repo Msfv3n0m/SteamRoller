@@ -162,8 +162,14 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
                 Write-Host "Passwords randomized on $(hostname)" -ForegroundColor Green         
             }
             Catch {
-                cmd /c $cmdCommand          # pass contingency password through psremoting
-                Write-Host "Static password set for all users on $_" -ForegroundColor Yellow
+                Add-Type -AssemblyName System.Web
+                Get-CimInstance -ClassName Win32_UserAccount | ?{$_.Name -ne $admin} | %{                           
+                    $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
+                    net user $_.Name $pass
+                    Write-Output "$(hostname)\$_,$pass"
+                    $pass = $Null
+                }
+                Write-Host "Passwords randomized on $(hostname) with cim" -ForegroundColor Green   
             }
         } # >> C:\incred.csv 
 		# & $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
