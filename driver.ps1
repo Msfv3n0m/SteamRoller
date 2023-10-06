@@ -298,22 +298,13 @@ if ($boolInput)
 
 $job1 | Wait-Job
 GetTools $cd $downloads
-$job2 = Start-Job -ScriptBlock{
-    param($cd)
+$job2 = Start-Job -ScriptBlock {
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
-$job3 = Start-Job -ScriptBlock{
-    Replace
-}
-$job4 = Start-Job -ScriptBlock{
-    ImportGPO1
-}
-$job5 = Start-Job -ScriptBlock{
-    CreateOUAndDistribute
-}
-$job6 = Start-Job -ScriptBlock{
-    StartSMBShare
-}
+$job3 = Start-Job -ScriptBlock ${Function:Replace}
+$job4 = Start-Job -ScriptBlock ${Function:ImportGPO1}
+$job5 = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
+$job6 = Start-Job -ScriptBlock ${Funciton:StartSMBShare}
 $job2 | Wait-Job
 $job3 | Wait-Job 
 $job4 | Wait-Job 
