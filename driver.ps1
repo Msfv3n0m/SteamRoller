@@ -308,12 +308,12 @@ $job2 = Start-Job -ScriptBlock {
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
 $job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
+$job3 | Wait-Job
 $job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -InitializationScript $init -ArgumentList $cd
+$job4 | Wait-Job
 $job5 = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
 $job6 = Start-Job -ScriptBlock ${Function:StartSMBShare}
 $job2 | Wait-Job
-$job3 | Wait-Job 
-$job4 | Wait-Job 
 $job5 | Wait-Job 
 $job6 | Wait-Job 
 
