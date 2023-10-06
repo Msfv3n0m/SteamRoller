@@ -278,9 +278,23 @@ StartSMBShare
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 gpupdate /force
 Resume
-Write-Host "You want to output a file of the randomly generated passwords"
-$input = Read-Host "Is the above statement 'true' or 'false'"
-$boolInput = [bool]$input 
+while ($boolInput -eq $Null)
+{
+    $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
+    if ($i -eq "yes")
+    {   
+        $boolInput = $True
+    }
+    elseif ($i -eq "no")
+    {
+        $boolInput = $False
+    }
+    else
+    {
+        Write-Host "Input not accepted" -ForegroundColor Red
+    }
+}
+
 if ($boolInput)
 {
     $filePath = Read-Host "What is the filepath/name you want to store the passwords in? "
