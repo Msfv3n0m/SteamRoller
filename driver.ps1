@@ -276,7 +276,6 @@ ImportGPO1
 CreateOUAndDistribute 
 StartSMBShare 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
-netsh advfirewall firewall add rule name="AllowWinRM_Out" dir=out action=allow protocol=TCP remoteport=5985     # allow outbound winrm from the dc that steamroller runs on
 gpupdate /force
 Resume
 Write-Host "You want to output a file of the randomly generated passwords"
