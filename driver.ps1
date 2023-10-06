@@ -304,7 +304,7 @@ $job2 = Start-Job -ScriptBlock {
 $job3 = Start-Job -ScriptBlock ${Function:Replace}
 $job4 = Start-Job -ScriptBlock ${Function:ImportGPO1}
 $job5 = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
-$job6 = Start-Job -ScriptBlock ${Funciton:StartSMBShare}
+$job6 = Start-Job -ScriptBlock ${Function:StartSMBShare}
 $job2 | Wait-Job
 $job3 | Wait-Job 
 $job4 | Wait-Job 
