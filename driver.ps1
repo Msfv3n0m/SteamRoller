@@ -46,25 +46,28 @@ function GetTools ($cd, $downloads) {
 	Resume
 }
 
+$init = {
 function ImportGPO2 ([String]$rootdir,[switch]$formatOutput) {
-<#
-This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
-#>
-    $results = New-Object System.Collections.SortedList
-    Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
-        $guid = $_.Directory.Name
-        $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
-        $results.Add($displayName, $guid)
-    }
-    if ($formatOutput)
-    {
-        $results | Format-Table -AutoSize
-    }
-    else
-    {
-        $results
+    <#
+    This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
+    #>
+        $results = New-Object System.Collections.SortedList
+        Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
+            $guid = $_.Directory.Name
+            $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
+            $results.Add($displayName, $guid)
+        }
+        if ($formatOutput)
+        {
+            $results | Format-Table -AutoSize
+        }
+        else
+        {
+            $results
+        }
     }
 }
+
 
 function ImportGPO1 () {
 <#
@@ -116,9 +119,9 @@ function CreateOUAndDistribute () {
     }
 }
 
-function Replace () {
+function Replace ($cd) {
     Write-Host "Inserting DC Name into GPOs" -ForegroundColor Green
-    Get-ChildItem "$(pwd)\GPO\" | %{
+    Get-ChildItem "$cd\GPO\" | %{
         $path1 = $_.FullName + "\gpreport.xml"
 	if (Test-Path -Path $path1 -PathType Leaf) {
         	(Get-Content $path1) -replace "replaceme1", "$(hostname)" | Set-Content $path1
@@ -130,10 +133,10 @@ function Replace () {
     } 
 }
 
-function StartSMBShare () {
+function StartSMBShare ($cd) {
     Write-Host "Starting SMB Share" -ForegroundColor Green
-    net share SharingIsCaring="$(pwd)\SharingIsCaring"
-    icacls.exe "$(pwd)\SharingIsCaring" /inheritancelevel:e /grant "*S-1-5-11:(OI)(CI)(R)" #grant acess to authenticated users
+    net share SharingIsCaring="$cd\SharingIsCaring"
+    icacls.exe "$cd\SharingIsCaring" /inheritancelevel:e /grant "*S-1-5-11:(OI)(CI)(R)" #grant acess to authenticated users
 }
 
 $passFuncs = {
@@ -301,10 +304,11 @@ if ($boolInput)
 $job1 | Wait-Job
 GetTools $cd $downloads
 $job2 = Start-Job -ScriptBlock {
+    param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
-$job3 = Start-Job -ScriptBlock ${Function:Replace}
-$job4 = Start-Job -ScriptBlock ${Function:ImportGPO1}
+$job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
+$job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -InitializationScript $init -ArgumentList $cd
 $job5 = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
 $job6 = Start-Job -ScriptBlock ${Function:StartSMBShare}
 $job2 | Wait-Job
