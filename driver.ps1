@@ -46,20 +46,6 @@ function GetTools ($cd, $downloads) {
 	Resume
 }
 
-function ChangeADPass () {
-    Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
-    $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
-    Add-Type -AssemblyName System.Web
-    # Write-Output "Username,Password" > C:\incred.csv
-    Get-ADUser -Filter * | ?{$_.Name -ne $env:username} | %{
-    $user = $_.Name
-    $pass = [System.Web.Security.Membership]::GeneratePassword(17,2)
-    Write-Output "$domain\$user,$pass"
-    Set-ADAccountPassword -Identity $_.Name -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
-    $pass = $Null
-  }
-}
-
 function ImportGPO2 ([String]$rootdir,[switch]$formatOutput) {
 <#
 This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
@@ -150,6 +136,7 @@ function StartSMBShare () {
     icacls.exe "$(pwd)\SharingIsCaring" /inheritancelevel:e /grant "*S-1-5-11:(OI)(CI)(R)" #grant acess to authenticated users
 }
 
+$passFuncs = {
 function ChangeLocalPasswords ($ServersList, $cd) {
   Write-Host "Changing local passwords" -ForegroundColor Green
   Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
@@ -184,6 +171,21 @@ function ChangeLocalPasswords ($ServersList, $cd) {
     	  Write-Output "Could not access " $_
     	}
   }
+}
+
+function ChangeADPass () {
+    Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
+    $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
+    Add-Type -AssemblyName System.Web
+    # Write-Output "Username,Password" > C:\incred.csv
+    Get-ADUser -Filter * | ?{$_.Name -ne $env:username} | %{
+    $user = $_.Name
+    $pass = [System.Web.Security.Membership]::GeneratePassword(17,2)
+    Write-Output "$domain\$user,$pass"
+    Set-ADAccountPassword -Identity $_.Name -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
+    $pass = $Null
+  }
+}
 }
 
 function RemoveFirewallRules($ServersList, $DCList) {
@@ -315,7 +317,7 @@ Write-Host "`nManually upate the group policy configuration on each member in th
 gpupdate /force
 Resume
 $job7 = Start-Job -ScriptBlock {
-    param($ServersList, $filePathLocal)
+    param($ServersList, $filePathLocal, $boolInput)
     if ($ServersList.Name -ne $Null)
     {
         $output = ChangeLocalPasswords $ServersList.Name $cd
@@ -325,15 +327,16 @@ $job7 = Start-Job -ScriptBlock {
         $output | Out-File -FilePath $filePathLocal -Append
     }
     $output = $Null
-} -ArgumentList $ServersList, $filePathLocal
+} -InitializationScript $passFuncs -ArgumentList $ServersList, $filePathLocal, $boolInput
 $job8 = Start-Job -ScriptBlock{
+    param($filePathAD, $boolInput)
     $output = ChangeADPass
     if ($boolInput)
     {
         $output | Out-File -FilePath $filePathAD -Append
     }
     $output = $Null
-} -ArgumentList $filePathAD
+} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 while ($job7.State -eq 'Running')
 {
     $job7output = Receive-Job $job7 
