@@ -166,7 +166,7 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
                 Get-CimInstance -ClassName Win32_UserAccount | ?{$_.Name -ne $admin} | %{                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
                     net user $_.Name $pass
-                    Write-Output "$(hostname)\$_,$pass"
+                    Write-Output "$(hostname)\$_.Name,$pass"
                     $pass = $Null
                 }
                 Write-Host "Passwords randomized on $(hostname) with cim" -ForegroundColor Green   
