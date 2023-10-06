@@ -140,10 +140,8 @@ function StartSMBShare ($cd) {
 }
 
 $passFuncs = {
-function ChangeLocalPasswords ($ServersList, $cd) {
+function ChangeLocalPasswords ($ServersList, $cd, $admin) {
   Write-Host "Changing local passwords" -ForegroundColor Green
-  Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
-  $admin = Read-Host 
   $newPass="Superchiapet1"
   $cmdCommand1 = @"
   for /f "skip=1" %a in ('net user') do net user %a $newPass 
@@ -301,18 +299,23 @@ if ($boolInput)
     Write-Output "Username,Password" > $filePathLocal
 }
 
+Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
+$admin = Read-Host 
+
 $job1 | Wait-Job
 GetTools $cd $downloads
 $job2 = Start-Job -ScriptBlock {
     param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
-$job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
-$job3 | Wait-Job
-$job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -InitializationScript $init -ArgumentList $cd
-$job4 | Wait-Job
+# $job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
+# $job3 | Wait-Job
+Replace $cd
+ImportGPO1 $cd
+# $job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -InitializationScript $init -ArgumentList $cd
+# $job4 | Wait-Job
 $job5 = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
-$job6 = Start-Job -ScriptBlock ${Function:StartSMBShare}
+$job6 = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
 $job2 | Wait-Job
 $job5 | Wait-Job 
 $job6 | Wait-Job 
@@ -321,17 +324,17 @@ Write-Host "`nManually upate the group policy configuration on each member in th
 gpupdate /force
 Resume
 $job7 = Start-Job -ScriptBlock {
-    param($ServersList, $filePathLocal, $boolInput)
+    param($ServersList, $filePathLocal, $boolInput, $admin)
     if ($ServersList.Name -ne $Null)
     {
-        $output = ChangeLocalPasswords $ServersList.Name $cd
+        $output = ChangeLocalPasswords $ServersList.Name $cd $admin
     }
     if ($boolInput)
     {
         $output | Out-File -FilePath $filePathLocal -Append
     }
     $output = $Null
-} -InitializationScript $passFuncs -ArgumentList $ServersList, $filePathLocal, $boolInput
+} -InitializationScript $passFuncs -ArgumentList $ServersList, $filePathLocal, $boolInput, $admin
 $job8 = Start-Job -ScriptBlock{
     param($filePathAD, $boolInput)
     $output = ChangeADPass
