@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NTServices clsid="{2CFB484A-4E96-4b5d-A0B6-093D2F91E6AE}"><NTService clsid="{AB6F0B67-341F-4e51-92F9-005FBFBA1A43}" name="TermService" image="2" changed="2023-10-06 01:26:27" uid="{9C780A19-EF11-4BA3-9945-06923F1723A1}"><Properties startupType="AUTOMATIC" serviceName="TermService" timeout="30" firstFailure="RESTART" secondFailure="RESTART" thirdFailure="RESTART" resetFailCountDelay="0" restartServiceDelay="60000"/></NTService>
+</NTServices>
