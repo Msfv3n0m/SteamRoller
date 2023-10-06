@@ -57,7 +57,7 @@ function ChangeADPass () {
     # Write-Output "Username,Password" > C:\incred.csv
     Get-ADUser -Filter * | ?{$_.Name -ne $env:username} | %{
     $user = $_.Name
-    $pass = [System.Web.Security.Membership]::GeneratePassword(15,2)
+    $pass = [System.Web.Security.Membership]::GeneratePassword(17,2)
     Write-Output "$domain\$user,$pass"
     Set-ADAccountPassword -Identity $_.Name -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
     $pass = $Null
@@ -171,7 +171,7 @@ function ChangeLocalPasswords ($ServersList) {
             Try {
                 Add-Type -AssemblyName System.Web
                 Get-LocalUser | ?{$_.Name -ne $admin} | %{                           
-                    $pass=[System.Web.Security.Membership]::GeneratePassword(15,2)
+                    $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
                     Write-Output "$(hostname)\$_,$pass"
                     $pass = $Null
@@ -180,7 +180,7 @@ function ChangeLocalPasswords ($ServersList) {
             }
             Catch {
                 cmd /c $cmdCommand          # pass contingency password through psremoting
-                Write-Host "Static password set for all users on $_" -ForegroundColor Green
+                Write-Host "Static password set for all users on $_" -ForegroundColor Yellow
             }
         } # >> C:\incred.csv 
 		# & $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
@@ -276,6 +276,8 @@ ImportGPO1
 CreateOUAndDistribute 
 StartSMBShare 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
+netsh advfirewall firewall add rule name="AllowWinRM_Out" dir=out action=allow protocol=TCP remoteport=5985     # allow outbound winrm from the dc that steamroller runs on
+gpupdate /force
 Resume
 Write-Host "You want to output a file of the randomly generated passwords"
 $input = Read-Host "Is the above statement 'true' or 'false'"
@@ -305,5 +307,5 @@ if ($boolInput)
 $output = $Null
 ChangeAdminPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
-# ChangeADPass
 DeleteDriver
+gpupdate /force 
