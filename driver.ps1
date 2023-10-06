@@ -27,11 +27,8 @@ function Resume () {
 	Write-Host "`n"
 }
 
-function GetTools () {
+function GetTools ($cd, $downloads) {
     Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
-	$cd = $(pwd)
-	$downloads = "$home\Downloads"
-    gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
 	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
 	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
@@ -47,7 +44,6 @@ function GetTools () {
     }
 	Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
 	Resume
-	Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 }
 
 function ChangeADPass () {
@@ -154,11 +150,10 @@ function StartSMBShare () {
     icacls.exe "$(pwd)\SharingIsCaring" /inheritancelevel:e /grant "*S-1-5-11:(OI)(CI)(R)" #grant acess to authenticated users
 }
 
-function ChangeLocalPasswords ($ServersList) {
+function ChangeLocalPasswords ($ServersList, $cd) {
   Write-Host "Changing local passwords" -ForegroundColor Green
   Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
   $admin = Read-Host 
-  $cd = $(pwd)
   $newPass="Superchiapet1"
   $cmdCommand1 = @"
   for /f "skip=1" %a in ('net user') do net user %a $newPass 
@@ -249,9 +244,9 @@ function StopSMBShare () {
   net share SharingIsCaring /del /yes
 }
 
-function DeleteDriver () {
+function DeleteDriver ($cd) {
     Write-Host "Deleting driver.ps1" -ForegroundColor Green
-	& "$(pwd)\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1" > $Null
+	& "$cd\sdelete.exe" -accepteula -p 3 "$(pwd)\driver.ps1" > $Null
 }
 
 
@@ -270,14 +265,10 @@ $DCList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBa
 $ServersList | Select -ExpandProperty Name >> servers.txt
 $DCList | Select -ExpandProperty Name >> servers.txt
 
-GetTools
-Replace 
-ImportGPO1 
-CreateOUAndDistribute 
-StartSMBShare 
-Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
-gpupdate /force
-Resume
+$job1 = Start-Job -ScriptBlock {
+    gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
+}
+
 while ($boolInput -eq $Null)
 {
     $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
@@ -298,27 +289,78 @@ while ($boolInput -eq $Null)
 if ($boolInput)
 {
     $filePath = Read-Host "What is the filepath/name you want to store the passwords in? "
-    Write-Output "Username,Password" > $filepath
+    $filePathAD = $filePath + "_AD.csv"
+    $filePathLocal = $filePath + "_Local.csv"
+    Write-Output "Username,Password" > $filePathAD
+    Write-Output "Username,Password" > $filePathLocal
 }
-if ($ServersList.Name -ne $Null)
+
+$job1 | Wait-Job
+GetTools $cd $downloads
+$job2 = Start-Job -ScriptBlock{
+    Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
+}
+$job3 = Start-Job -ScriptBlock{
+    Replace
+}
+$job4 = Start-Job -ScriptBlock{
+    ImportGPO1
+}
+$job5 = Start-Job -ScriptBlock{
+    CreateOUAndDistribute
+}
+$job6 = Start-Job -ScriptBlock{
+    StartSMBShare
+}
+$job2 | Wait-Job
+$job3 | Wait-Job 
+$job4 | Wait-Job 
+$job5 | Wait-Job 
+$job6 | Wait-Job 
+
+Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
+gpupdate /force
+Resume
+$job7 = Start-Job -ScriptBlock {
+    if ($ServersList.Name -ne $Null)
+    {
+        $output = ChangeLocalPasswords $ServersList.Name $cd
+    }
+    if ($boolInput)
+    {
+        $output | Out-File -FilePath $filePathLocal -Append
+    }
+    $output = $Null
+}
+$job8 = Start-Job -ScriptBlock{
+    $output = ChangeADPass
+    if ($boolInput)
+    {
+        $output | Out-File -FilePath $filePathAD -Append
+    }
+    $output = $Null
+}
+while ($job7.State -eq 'Running')
 {
-    $output = ChangeLocalPasswords $ServersList.Name
+    $job7output = Receive-Job $job7 
+    if ($job7output) {
+        Write-Host $job7output
+    }
+    $job8output = Receive-Job $job8
+    if ($job8output) {
+        Write-Host $job8output
+    }
+    Start-Sleep -Milliseconds 500
 }
-if ($boolInput)
-{
-    $output | Out-File -FilePath $filePath -Append
-}
-$output = $Null
 RemoveFirewallRules $ServersList.Name $DCList.Name
 RemoveLinks $ServersList $DCList
 StopSMBShare
-$output = ChangeADPass
-if ($boolInput)
-{
-    $output | Out-File -FilePath $filePath -Append
+$job8 | Wait-Job
+$job8output = Receive-Job $job8
+if ($job8output) {
+    Write-Host $job8output
 }
-$output = $Null
 ChangeAdminPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
-DeleteDriver
+DeleteDriver $cd
 gpupdate /force 
