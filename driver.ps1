@@ -364,7 +364,7 @@ while ($job7.State -eq 'Running')
     }
     Start-Sleep -Milliseconds 500
 }
-RemoveFirewallRules $ServersList.Name $DCList.Name
+# RemoveFirewallRules $ServersList.Name $DCList.Name
 RemoveLinks $ServersList $DCList
 StopSMBShare
 $job8 | Wait-Job
