@@ -374,5 +374,6 @@ if ($job8output) {
 }
 ChangeAdminPass
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
+gpmc.msc
 DeleteDriver $cd
 gpupdate /force 
