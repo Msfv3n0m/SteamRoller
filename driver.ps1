@@ -34,6 +34,7 @@ function GetTools ($cd, $downloads) {
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     if (Test-Path $downloads\Sysinternals\) {
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd
+        Copy-Item $downloads\Sysinternals\TCPVCon.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
