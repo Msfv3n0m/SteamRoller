@@ -163,7 +163,7 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
             }
             Catch {
                 Add-Type -AssemblyName System.Web
-                Get-CimInstance -ClassName Win32_UserAccount | ?{$_.Name -ne $admin} | %{
+                Get-WMIObject -Class Win32_UserAccount | ?{$_.Name -ne $admin} | %{
                     $name = $_.Name                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
                     net user $_.Name $pass > $Null
@@ -171,7 +171,7 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
                     $pass = $Null
                 }
                 wevtutil cl Microsoft-Windows-Powershell/Operational
-                Write-Host "Passwords randomized on $(hostname) with cim" -ForegroundColor Green   
+                Write-Host "Passwords randomized on $(hostname) with wmi" -ForegroundColor Green   
             }
         } # >> C:\incred.csv 
 		# & $cd\PsExec.exe \\$_ -nobanner -accepteula powershell -command "Add-Type -AssemblyName System.Web;`$c = ','; `$h=`$(hostname); Get-LocalUser | ?{`$_.Name -ne 'Administrator'} | %{`$pass=[System.Web.Security.Membership]::GeneratePassword(20,2); Set-LocalUser -Name `$_.Name -Password (ConvertTo-SecureString -AsPlainText `$pass -Force); Write-Output `$h\`$_`$c`$pass; `$pass = `$Null}" >> C:\incred.csv
