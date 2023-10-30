@@ -233,13 +233,13 @@ function RemoveLinks ($ServersList, $DCList) {
     $ServersList| %{
         $input2 = "OU=" + $_.Name + "," + $root
 	    Remove-GPLink -Name "Tools" -Target $input2
-        Remove-GPLink -Name "WinRM (http)" -Target $input2 
+        # Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
     }
     $DCList | %{
         $input2 = "OU=" + $_.Name + "," + $root
         Remove-GPLink -Name "Tools" -Target $input2
-        Remove-GPLink -Name "WinRM (http)" -Target $input2 
+        # Remove-GPLink -Name "WinRM (http)" -Target $input2 
         Remove-GPLink -Name "Events" -Target $input2
     }
 }
