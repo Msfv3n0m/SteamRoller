@@ -276,6 +276,7 @@ $DCList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBa
 
 $ServersList | Select -ExpandProperty Name >> servers.txt
 $DCList | Select -ExpandProperty Name >> servers.txt
+$DCList | Select -ExpandProperty Name >> dc.txt
 
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
