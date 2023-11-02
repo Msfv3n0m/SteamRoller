@@ -378,3 +378,4 @@ Write-Host "The program has completed successfully. Now, Manually update the gro
 gpmc.msc
 DeleteDriver $cd
 gpupdate /force 
+powershell
