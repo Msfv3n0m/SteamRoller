@@ -37,7 +37,15 @@ function RunCommand ($ServersList, $cmd) {
             }
     }
 }
-
+function Netstat()
+{
+   $Netstat = (Netstat -ano | Select -skip 2) -Join "`n" -Split "(?= [TU][CD]P\s+(?:\d+\.|\[\w*:\w*:))" | 
+       % {$_.trim() -Replace "`n",' ' -Replace '\s{2,20}',','} |
+       ConvertFrom-Csv
+   $Netstat  | Add-Member -MemberType NoteProperty -Name Path -Value ""
+   $Netstat | %{$_.Path = $(ps -id $_.pid | Select -ExpandProperty path)}
+   $Netstat| ?{$_.Path -ne $null} | ft -Autosize -Wrap
+}
 function ChangeAdminPass () {
     Write-Host "Setting a new administrator password" -ForegroundColor Yellow
     $newPass Read-Host "Please set a new password for $(whoami):" -AsSecureString
