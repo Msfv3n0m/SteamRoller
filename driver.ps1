@@ -29,9 +29,10 @@ function Resume () {
 
 function GetTools ($cd, $downloads) {
     Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
-	gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
-	gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
+    gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
+    gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
+    Copy-Item $cd\netstat.ps1 $cd\SharingIsCaring\tools
     if (Test-Path $downloads\Sysinternals\) {
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd
         Copy-Item $downloads\Sysinternals\TCPVCon.exe $cd\SharingIsCaring\tools
