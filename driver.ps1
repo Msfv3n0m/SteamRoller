@@ -34,6 +34,7 @@ function GetTools ($cd, $downloads) {
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     if (Test-Path $downloads\Sysinternals\) {
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd
+        Copy-Item $downloads\Sysinternals\TCPVCon.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\Autoruns.exe $cd\SharingIsCaring\tools
@@ -275,6 +276,7 @@ $DCList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBa
 
 $ServersList | Select -ExpandProperty Name >> servers.txt
 $DCList | Select -ExpandProperty Name >> servers.txt
+$DCList | Select -ExpandProperty Name >> dc.txt
 
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
@@ -377,3 +379,4 @@ Write-Host "The program has completed successfully. Now, Manually update the gro
 gpmc.msc
 DeleteDriver $cd
 gpupdate /force 
+powershell
