@@ -28,7 +28,6 @@ function Resume () {
 }
 
 function GetTools ($cd, $downloads) {
-    Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
     gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
@@ -325,6 +324,7 @@ $job8 = Start-Job -ScriptBlock{
 } -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
 $job1 | Wait-Job
+Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 GetTools $cd $downloads
 $job2 = Start-Job -ScriptBlock {
     param($cd)
@@ -383,9 +383,9 @@ $backup1 = "bone"
 $backup2 = "btwo"
 $backup3 = "bthree"
 $ServersList | %{
-	$backuppass1 = Read-Host "Enter the password for bone on $_:"
-	$backuppass2 = Read-Host "Enter the password for btwo on $_:"
-	$backuppass3 = Read-Host "Enter the password for bthree on $_:"
+	$backuppass1 = Read-Host "Enter the password for bone on $_"
+	$backuppass2 = Read-Host "Enter the password for btwo on $_"
+	$backuppass3 = Read-Host "Enter the password for bthree on $_"
 	icm -cn $_ -scriptblock {
  		net user $backup1 $backuppass1 /add
     		net user $backup2 $backuppass2 /add
@@ -408,10 +408,11 @@ del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\Consol
 $backuppass1 = $null
 $backuppass2 = $null
 $backuppass3 = $null
+New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
 
 
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 gpmc.msc
-DeleteDriver $cd
+# DeleteDriver $cd
 gpupdate /force 
 powershell
