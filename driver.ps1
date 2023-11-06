@@ -309,9 +309,22 @@ if ($boolInput)
     Write-Output "Username,Password" > $filePathAD
     Write-Output "Username,Password" > $filePathLocal
 }
+$backup1 = Read-Host "Enter the name of backup user 1: "
+$backup2 = Read-Host "Enter the name of backup user 2: "
+$backup3 = Read-Host "Enter the name of backup user 3: "
+$backuppass = Read-Host "Enter the password ?"
 
-Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
-$admin = Read-Host 
+$admin = $env:username 
+
+$job8 = Start-Job -ScriptBlock{
+    param($filePathAD, $boolInput)
+    $output = ChangeADPass
+    if ($boolInput)
+    {
+        $output | Out-File -FilePath $filePathAD -Append
+    }
+    $output = $Null
+} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
 $job1 | Wait-Job
 GetTools $cd $downloads
@@ -346,15 +359,6 @@ $job7 = Start-Job -ScriptBlock {
     }
     $output = $Null
 } -InitializationScript $passFuncs -ArgumentList $ServersList, $filePathLocal, $boolInput, $admin
-$job8 = Start-Job -ScriptBlock{
-    param($filePathAD, $boolInput)
-    $output = ChangeADPass
-    if ($boolInput)
-    {
-        $output | Out-File -FilePath $filePathAD -Append
-    }
-    $output = $Null
-} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 while ($job7.State -eq 'Running')
 {
     $job7output = Receive-Job $job7 
