@@ -394,6 +394,15 @@ $ServersList | %{
 	}
  	write-host "backup users created on $_" -foregroundcolor green
 }
+$backuppass1 = Read-Host "Enter the password for bone on $(hostname):"
+$backuppass2 = Read-Host "Enter the password for btwo on $(hostname):"
+$backuppass3 = Read-Host "Enter the password for bthree on $(hostname):"
+net user $backup1 $backuppass1 /add
+net user $backup2 $backuppass2 /add
+net user $backup3 $backuppass3 /add
+net localgroup administrators $backup1 $backup2 $backup3 /add
+net group "Domain admins" $backup1 $backup2 $backup3 /add
+
 $backuppass1 = $null
 $backuppass2 = $null
 $backuppass3 = $null
