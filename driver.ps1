@@ -379,10 +379,23 @@ if ($job8output) {
 }
 
 
-$backup1 = Read-Host "Enter the name of backup user 1: "
-$backup2 = Read-Host "Enter the name of backup user 2: "
-$backup3 = Read-Host "Enter the name of backup user 3: "
-$backuppass = Read-Host "Enter the password ?"
+$backup1 = "bone"
+$backup2 = "btwo"
+$backup3 = "bthree"
+$ServersList | %{
+	$backuppass1 = Read-Host "Enter the password for bone on $_:"
+	$backuppass2 = Read-Host "Enter the password for btwo on $_:"
+	$backuppass3 = Read-Host "Enter the password for bthree on $_:"
+	icm -cn $_ -scriptblock {
+ 		net user $backup1 $backuppass1 /add
+    		net user $backup2 $backuppass2 /add
+ 		net user $backup3 $backuppass3 /add
+   		net localgroup administrators $backup1 $backup2 $backup3 /add
+	}
+}
+$backuppass1 = $null
+$backuppass2 = $null
+$backuppass3 = $null
 
 
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
