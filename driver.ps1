@@ -392,6 +392,7 @@ $ServersList | %{
  		net user $backup3 $backuppass3 /add
    		net localgroup administrators $backup1 $backup2 $backup3 /add
 	}
+ 	write-host "backup users created on $_" -foregroundcolor green
 }
 $backuppass1 = $null
 $backuppass2 = $null
