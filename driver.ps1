@@ -276,14 +276,15 @@ $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -Sea
 $DCList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root")     # used in createouanddistribute, removelinks, changelocalpasswords
 
 $ServersList | Select -ExpandProperty Name >> servers.txt
-$DCList | Select -ExpandProperty Name >> servers.txt
+$ServersList | Select -ExpandProperty Name >> all.txt
+$DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
 
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
 } -ArgumentList $downloads
-
+ChangeAdminPass
 while ($boolInput -eq $Null)
 {
     $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
@@ -309,10 +310,7 @@ if ($boolInput)
     Write-Output "Username,Password" > $filePathAD
     Write-Output "Username,Password" > $filePathLocal
 }
-$backup1 = Read-Host "Enter the name of backup user 1: "
-$backup2 = Read-Host "Enter the name of backup user 2: "
-$backup3 = Read-Host "Enter the name of backup user 3: "
-$backuppass = Read-Host "Enter the password ?"
+
 
 $admin = $env:username 
 
@@ -379,7 +377,14 @@ $job8output = Receive-Job $job8
 if ($job8output) {
     Write-Host $job8output
 }
-ChangeAdminPass
+
+
+$backup1 = Read-Host "Enter the name of backup user 1: "
+$backup2 = Read-Host "Enter the name of backup user 2: "
+$backup3 = Read-Host "Enter the name of backup user 3: "
+$backuppass = Read-Host "Enter the password ?"
+
+
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 gpmc.msc
 DeleteDriver $cd
