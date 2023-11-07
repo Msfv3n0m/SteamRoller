@@ -278,6 +278,7 @@ $ServersList | Select -ExpandProperty Name >> servers.txt
 $ServersList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
+$AllServers = $ServersList + $DCList
 
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
@@ -379,6 +380,7 @@ if ($job8output) {
 }
 
 
+
 $backup1 = "bone"
 $backup2 = "btwo"
 $backup3 = "bthree"
@@ -428,6 +430,11 @@ $backuppass2 = $null
 $backuppass3 = $null
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
 
+$job9 = Start-Job -Scriptblock {
+    $AllServers | %{
+        icm -cn $_ -scriptblock {gpupdate /force}
+    }
+}
 
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 gpmc.msc
