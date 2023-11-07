@@ -397,10 +397,10 @@ $ServersList | %{
 
 	icm -cn $_ -scriptblock {
  		net user $backup1 $backuppass1 /add
-    		net user $backup2 $backuppass2 /add
+        net user $backup2 $backuppass2 /add
  		net user $backup3 $backuppass3 /add
    		net localgroup administrators $backup1 $backup2 $backup3 /add
-     		del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+        del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 	}
  	write-host "backup users created on $_" -foregroundcolor green
 }
