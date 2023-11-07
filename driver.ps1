@@ -383,9 +383,18 @@ $backup1 = "bone"
 $backup2 = "btwo"
 $backup3 = "bthree"
 $ServersList | %{
-	$backuppass1 = Read-Host "Enter the password for bone on $_"
-	$backuppass2 = Read-Host "Enter the password for btwo on $_"
-	$backuppass3 = Read-Host "Enter the password for bthree on $_"
+	$ss1 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+    $pbp1 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss1)
+    $backuppass1 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp1)
+    
+    $ss2 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+    $pbp2 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss2)
+    $backuppass2 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp2)
+
+	$ss3 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+    $pbp3 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss3)
+    $backuppass3 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp3)
+
 	icm -cn $_ -scriptblock {
  		net user $backup1 $backuppass1 /add
     		net user $backup2 $backuppass2 /add
@@ -395,9 +404,18 @@ $ServersList | %{
 	}
  	write-host "backup users created on $_" -foregroundcolor green
 }
-$backuppass1 = Read-Host "Enter the password for bone on $(hostname):"
-$backuppass2 = Read-Host "Enter the password for btwo on $(hostname):"
-$backuppass3 = Read-Host "Enter the password for bthree on $(hostname):"
+$ss1 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+$pbp1 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss1)
+$backuppass1 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp1)
+
+$ss2 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+$pbp2 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss2)
+$backuppass2 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp2)
+
+$ss3 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+$pbp3 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss3)
+$backuppass3 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp3)
+
 net user $backup1 $backuppass1 /add
 net user $backup2 $backuppass2 /add
 net user $backup3 $backuppass3 /add
