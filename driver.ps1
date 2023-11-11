@@ -382,8 +382,8 @@ if ($job8output) {
 
 
 $backup1 = "bone"
-$backup2 = "btwo"
-$backup3 = "bthree"
+$backup2 = "bwo"
+$backup3 = "bee"
 $ServersList | %{
 	$ss1 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
     $pbp1 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss1)
