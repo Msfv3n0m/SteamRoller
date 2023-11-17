@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NTServices clsid="{2CFB484A-4E96-4b5d-A0B6-093D2F91E6AE}"><NTService clsid="{AB6F0B67-341F-4e51-92F9-005FBFBA1A43}" name="NTDS" image="2" changed="2023-10-06 01:24:35" uid="{8092C555-9EC3-4F46-ABAB-8C94A401776B}"><Properties firstFailure="RESTART" secondFailure="RESTART" thirdFailure="RESTART" resetFailCountDelay="0" restartServiceDelay="60000" startupType="AUTOMATIC" serviceName="NTDS" serviceAction="START" timeout="30"/></NTService>
+	<NTService clsid="{AB6F0B67-341F-4e51-92F9-005FBFBA1A43}" name="DNS" image="2" changed="2023-10-06 01:25:12" uid="{321603A2-D2DE-4F06-8457-F4223652B400}"><Properties startupType="AUTOMATIC" serviceName="DNS" serviceAction="START" timeout="30" firstFailure="RESTART" secondFailure="RESTART" thirdFailure="RESTART" resetFailCountDelay="0" restartServiceDelay="60000"/></NTService>
+</NTServices>
