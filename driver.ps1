@@ -435,17 +435,17 @@ $job9 = Start-Job -Scriptblock {
         icm -cn $_ -scriptblock {
             gpupdate /force
 
-            takeown /F 'C:\Windows\System32\sethc.exe'
-            icacls 'C:\Windows\System32\sethc.exe' /grant administrator:F
-            del 'C:\Windows\System32\sethc.exe'
+            takeown /F C:\Windows\System32\sethc.exe
+            icacls C:\Windows\System32\sethc.exe /grant administrators:F
+            del C:\Windows\System32\sethc.exe
 
-            takeown /F 'C:\Windows\System32\utilman.exe'
-            icacls 'C:\Windows\System32\utilman.exe' /grant administrator:F
-            del 'C:\Windows\System32\utilman.exe'
+            takeown /F C:\Windows\System32\utilman.exe
+            icacls C:\Windows\System32\utilman.exe /grant administrators:F
+            del C:\Windows\System32\utilman.exe
 
-            takeown /F 'C:\Windows\System32\osk.exe'
-            icacls 'C:\Windows\System32\osk.exe' /grant administrator:F
-            del 'C:\Windows\System32\osk.exe'
+            takeown /F C:\Windows\System32\osk.exe
+            icacls C:\Windows\System32\osk.exe /grant administrators:F
+            del C:\Windows\System32\osk.exe
         }
     }
 }
