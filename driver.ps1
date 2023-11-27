@@ -389,11 +389,11 @@ $ServersList | %{
     $pbp1 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss1)
     $backuppass1 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp1)
     
-    $ss2 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+    $ss2 = Read-Host "Enter the password for bwo on $_" -AsSecureString -Force
     $pbp2 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss2)
     $backuppass2 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp2)
 
-	$ss3 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
+	$ss3 = Read-Host "Enter the password for bee on $_" -AsSecureString -Force
     $pbp3 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss3)
     $backuppass3 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp3)
 
