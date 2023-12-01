@@ -28,7 +28,6 @@ function Resume () {
 }
 
 function GetTools ($cd, $downloads) {
-    Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
     gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
@@ -104,7 +103,6 @@ function CreateOUAndDistribute () {
     New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
     New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
-
     }
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
@@ -155,7 +153,7 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
             Param($cmdCommand, $admin)
             Try {
                 Add-Type -AssemblyName System.Web
-                Get-LocalUser | ?{$_.Name -ne $admin} | %{                           
+                Get-LocalUser | ?{$_.Name -ne $admin -and $_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
                     Write-Output "$(hostname)\$_,$pass"
@@ -232,11 +230,14 @@ function RemoveFirewallRules($ServersList, $DCList) {
 function RemoveLinks ($ServersList, $DCList) {
     Write-Host "Removing GPO links" -ForegroundColor Green
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-    $ServersList| %{
-        $input2 = "OU=" + $_.Name + "," + $root
-	    Remove-GPLink -Name "Tools" -Target $input2
-        # Remove-GPLink -Name "WinRM (http)" -Target $input2 
-        Remove-GPLink -Name "Events" -Target $input2
+    if ($ServersList -ne $Null)
+    {
+        $ServersList| %{
+            $input2 = "OU=" + $_.Name + "," + $root
+            Remove-GPLink -Name "Tools" -Target $input2
+            # Remove-GPLink -Name "WinRM (http)" -Target $input2 
+            Remove-GPLink -Name "Events" -Target $input2
+        }
     }
     $DCList | %{
         $input2 = "OU=" + $_.Name + "," + $root
@@ -248,8 +249,10 @@ function RemoveLinks ($ServersList, $DCList) {
 
 function ChangeAdminPass () {
     Write-Host "Setting a new administrator password" -ForegroundColor Yellow
-    $newPass = Read-Host "Please set a new password for $(whoami)" -AsSecureString
-    Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
+    net user $env:username *
+    # $newPass = Read-Host "Please set a new password for $(whoami)" -AsSecureString
+    # Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
+    # netdom resetpwd /s:localhost /ud: $env:username /pd:*
 }
 
 function StopSMBShare () {
@@ -276,14 +279,16 @@ $ServersList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -Sea
 $DCList = $(Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root")     # used in createouanddistribute, removelinks, changelocalpasswords
 
 $ServersList | Select -ExpandProperty Name >> servers.txt
-$DCList | Select -ExpandProperty Name >> servers.txt
+$ServersList | Select -ExpandProperty Name >> all.txt
+$DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
+$AllServers = $ServersList + $DCList
 
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
 } -ArgumentList $downloads
-
+ChangeAdminPass
 while ($boolInput -eq $Null)
 {
     $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
@@ -310,10 +315,21 @@ if ($boolInput)
     Write-Output "Username,Password" > $filePathLocal
 }
 
-Write-Host "What is the name of an administrator present on each Windows System?" -ForegroundColor Yellow
-$admin = Read-Host 
+
+$admin = $env:username 
+
+$job8 = Start-Job -ScriptBlock{
+    param($filePathAD, $boolInput)
+    $output = ChangeADPass
+    if ($boolInput)
+    {
+        $output | Out-File -FilePath $filePathAD -Append
+    }
+    $output = $Null
+} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
 $job1 | Wait-Job
+Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 GetTools $cd $downloads
 $job2 = Start-Job -ScriptBlock {
     param($cd)
@@ -346,15 +362,6 @@ $job7 = Start-Job -ScriptBlock {
     }
     $output = $Null
 } -InitializationScript $passFuncs -ArgumentList $ServersList, $filePathLocal, $boolInput, $admin
-$job8 = Start-Job -ScriptBlock{
-    param($filePathAD, $boolInput)
-    $output = ChangeADPass
-    if ($boolInput)
-    {
-        $output | Out-File -FilePath $filePathAD -Append
-    }
-    $output = $Null
-} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 while ($job7.State -eq 'Running')
 {
     $job7output = Receive-Job $job7 
@@ -375,9 +382,42 @@ $job8output = Receive-Job $job8
 if ($job8output) {
     Write-Host $job8output
 }
-ChangeAdminPass
+
+
+Write-Host "Enter bone password" -ForegroundColor Yellow
+net user bone * /add
+Write-Host "Enter bwo password" -ForegroundColor Yellow
+net user bwo * /add
+Write-Host "Enter bee password" -ForegroundColor Yellow
+net user bee * /add
+net localgroup administrators bone bwo bee /add
+net group "Domain admins" bone bwo bee /add
+del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+
+New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
+
+$job9 = Start-Job -Scriptblock {
+    $AllServers | %{
+        icm -cn $_ -scriptblock {
+            gpupdate /force
+
+            takeown /F C:\Windows\System32\sethc.exe
+            icacls C:\Windows\System32\sethc.exe /grant administrators:F
+            del C:\Windows\System32\sethc.exe
+
+            takeown /F C:\Windows\System32\utilman.exe
+            icacls C:\Windows\System32\utilman.exe /grant administrators:F
+            del C:\Windows\System32\utilman.exe
+
+            takeown /F C:\Windows\System32\osk.exe
+            icacls C:\Windows\System32\osk.exe /grant administrators:F
+            del C:\Windows\System32\osk.exe
+        }
+    }
+}
+
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 gpmc.msc
-DeleteDriver $cd
+# DeleteDriver $cd
 gpupdate /force 
 powershell
