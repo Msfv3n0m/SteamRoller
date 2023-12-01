@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NTServices clsid="{2CFB484A-4E96-4b5d-A0B6-093D2F91E6AE}"><NTService clsid="{AB6F0B67-341F-4e51-92F9-005FBFBA1A43}" name="sshd" image="2" changed="2023-12-01 18:26:14" uid="{04B6F750-2269-4481-BB4B-93B35BBC81AB}"><Properties startupType="AUTOMATIC" serviceName="sshd" serviceAction="START" timeout="30"/></NTService>
+	<NTService clsid="{AB6F0B67-341F-4e51-92F9-005FBFBA1A43}" name="ssh-agent" image="2" changed="2023-12-01 18:26:36" uid="{CA379A1F-B4D4-46BC-8FD8-EE555B8DF603}"><Properties startupType="AUTOMATIC" serviceName="ssh-agent" serviceAction="START" timeout="30"/></NTService>
+</NTServices>
