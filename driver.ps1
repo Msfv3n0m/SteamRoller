@@ -246,9 +246,10 @@ function RemoveLinks ($ServersList, $DCList) {
 
 function ChangeAdminPass () {
     Write-Host "Setting a new administrator password" -ForegroundColor Yellow
-    $newPass = Read-Host "Please set a new password for $(whoami)" -AsSecureString
-    Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
-    netdom resetpwd /s:localhost /ud: $env:username /pd:*
+    net user $env:username *
+    # $newPass = Read-Host "Please set a new password for $(whoami)" -AsSecureString
+    # Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
+    # netdom resetpwd /s:localhost /ud: $env:username /pd:*
 }
 
 function StopSMBShare () {
