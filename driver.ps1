@@ -381,11 +381,11 @@ if ($job8output) {
 
 
 Write-Host "Enter bone password" -ForegroundColor Yellow
-net user $backup1 * /add
+net user bone * /add
 Write-Host "Enter bwo password" -ForegroundColor Yellow
-net user $backup2 * /add
+net user bwo * /add
 Write-Host "Enter bee password" -ForegroundColor Yellow
-net user $backup3 * /add
+net user bee * /add
 net localgroup administrators $backup1 $backup2 $backup3 /add
 net group "Domain admins" $backup1 $backup2 $backup3 /add
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
