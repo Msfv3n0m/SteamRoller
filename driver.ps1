@@ -32,7 +32,7 @@ function GetTools ($cd, $downloads) {
     gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads\7z*.msi | %{Move-Item $_.FullName $cd\SharingIsCaring\7z.msi}
-    Copy-Item 
+    Copy-Item $downloads\modsecurity*.msi | %{Move-Item $_.FullName $cd\SharingIsCaring\modsecurity.msi}
     Copy-Item $cd\netstat.ps1 $cd\SharingIsCaring\tools
     if (Test-Path $downloads\Sysinternals\) {
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd
