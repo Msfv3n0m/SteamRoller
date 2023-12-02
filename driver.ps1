@@ -103,7 +103,6 @@ function CreateOUAndDistribute () {
     New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
     New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
     New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
-
     }
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
 	$input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
@@ -154,7 +153,7 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
             Param($cmdCommand, $admin)
             Try {
                 Add-Type -AssemblyName System.Web
-                Get-LocalUser | ?{$_.Name -ne $admin} | %{                           
+                Get-LocalUser | ?{$_.Name -ne $admin -and $_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
                     Write-Output "$(hostname)\$_,$pass"
@@ -249,6 +248,7 @@ function ChangeAdminPass () {
     Write-Host "Setting a new administrator password" -ForegroundColor Yellow
     $newPass = Read-Host "Please set a new password for $(whoami)" -AsSecureString
     Set-ADAccountPassword -Identity $env:username -NewPassword $newPass -Reset
+    netdom resetpwd /s:localhost /ud: $env:username /pd:*
 }
 
 function StopSMBShare () {
@@ -380,54 +380,16 @@ if ($job8output) {
 }
 
 
-
-$backup1 = "bone"
-$backup2 = "bwo"
-$backup3 = "bee"
-$ServersList | %{
-	$ss1 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
-    $pbp1 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss1)
-    $backuppass1 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp1)
-    
-    $ss2 = Read-Host "Enter the password for bwo on $_" -AsSecureString -Force
-    $pbp2 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss2)
-    $backuppass2 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp2)
-
-	$ss3 = Read-Host "Enter the password for bee on $_" -AsSecureString -Force
-    $pbp3 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss3)
-    $backuppass3 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp3)
-
-	icm -cn $_ -scriptblock {
- 		net user $backup1 $backuppass1 /add
-        net user $backup2 $backuppass2 /add
- 		net user $backup3 $backuppass3 /add
-   		net localgroup administrators $backup1 $backup2 $backup3 /add
-        del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
-	}
- 	write-host "backup users created on $_" -foregroundcolor green
-}
-$ss1 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
-$pbp1 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss1)
-$backuppass1 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp1)
-
-$ss2 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
-$pbp2 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss2)
-$backuppass2 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp2)
-
-$ss3 = Read-Host "Enter the password for bone on $_" -AsSecureString -Force
-$pbp3 = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ss3)
-$backuppass3 = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($pbp3)
-
-net user $backup1 $backuppass1 /add
-net user $backup2 $backuppass2 /add
-net user $backup3 $backuppass3 /add
+Write-Host "Enter bone password" -ForegroundColor Yellow
+net user $backup1 * /add
+Write-Host "Enter bwo password" -ForegroundColor Yellow
+net user $backup2 * /add
+Write-Host "Enter bee password" -ForegroundColor Yellow
+net user $backup3 * /add
 net localgroup administrators $backup1 $backup2 $backup3 /add
 net group "Domain admins" $backup1 $backup2 $backup3 /add
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
-$backuppass1 = $null
-$backuppass2 = $null
-$backuppass3 = $null
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
 
 $job9 = Start-Job -Scriptblock {
