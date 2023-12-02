@@ -387,8 +387,8 @@ Write-Host "Enter bwo password" -ForegroundColor Yellow
 net user bwo * /add
 Write-Host "Enter bee password" -ForegroundColor Yellow
 net user bee * /add
-net localgroup administrators $backup1 $backup2 $backup3 /add
-net group "Domain admins" $backup1 $backup2 $backup3 /add
+net localgroup administrators bone bwo bee /add
+net group "Domain admins" bone bwo bee /add
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
