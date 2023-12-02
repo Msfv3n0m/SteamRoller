@@ -230,11 +230,14 @@ function RemoveFirewallRules($ServersList, $DCList) {
 function RemoveLinks ($ServersList, $DCList) {
     Write-Host "Removing GPO links" -ForegroundColor Green
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
-    $ServersList| %{
-        $input2 = "OU=" + $_.Name + "," + $root
-	    Remove-GPLink -Name "Tools" -Target $input2
-        # Remove-GPLink -Name "WinRM (http)" -Target $input2 
-        Remove-GPLink -Name "Events" -Target $input2
+    if ($ServersList -ne $Null)
+    {
+        $ServersList| %{
+            $input2 = "OU=" + $_.Name + "," + $root
+            Remove-GPLink -Name "Tools" -Target $input2
+            # Remove-GPLink -Name "WinRM (http)" -Target $input2 
+            Remove-GPLink -Name "Events" -Target $input2
+        }
     }
     $DCList | %{
         $input2 = "OU=" + $_.Name + "," + $root
