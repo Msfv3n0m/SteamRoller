@@ -412,6 +412,16 @@ $job10 = Start-Job -Scriptblock {
         Copy-Item \postgresql-backup.7z -FromSession $_ -Destination \windows\backups
         Copy-Item \mysql-backup.7z -FromSession $_ -Destination \windows\backups
         Copy-Item \mariadb-backup.7z -FromSession $_ -Destination \windows\backups
+
+        $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
+        $paths | %{
+            gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
+                $content = gc $_.fullname -erroraction silentlycontinue
+                if ($content -match 'name' -and $content -match 'address' -and ($content -match 'dob' -or $content -match 'birth') -or $content -match 'ssn' -or $content -match 'social security number'){
+                    $path=$_.fullname; echo "$(hostname):$path"
+                }
+            }
+        }
     }
 }
 
