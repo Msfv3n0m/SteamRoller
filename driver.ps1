@@ -287,7 +287,7 @@ $ServersList | Select -ExpandProperty Name >> servers.txt
 $ServersList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
-$AllServers = $ServersList + $DCList
+$AllServers = gc all.txt
 
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
@@ -400,13 +400,13 @@ $job10 = Start-Job -Scriptblock {
             cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
             cmd /c for /f "skip=4 tokens=*" %i in ('wmic share get path') do (7z a %i.zip %i\* -p$backuppass)
             
-            cmd /c for /f "tokens=*" %g in ('where /r "C:\Program Files" mariadb.exe') do ("%g" --backup --target-dir \mariadb-backup --user root)
+            cmd /c for /f "tokens=*" %g in ('where /r "C:\Program Files" mariadb.exe') do ('"%g" --backup --target-dir \mariadb-backup --user root')
             cmd /c 7z a \mariadb-backup-%computername%.7z \mariadb-backup\* -p$backuppass
             cmd /c rd /s /q \mariadb-backup
-            cmd /c for /f "tokens=*" %g in ('where /r "C:\Program Files" mysqldump.exe') do ("%g" -u root -A > \mysql-backup.sql)
+            cmd /c for /f "tokens=*" %g in ('where /r "C:\Program Files" mysqldump.exe') do ('"%g" -u root -A > \mysql-backup.sql')
             cmd /c 7z a \mysql-backup-%computername%.7z \mysql-backup.sql -p$backuppass
             cmd /c del /q \mysql-backup.sql
-            cmd /c for /f "tokens=*" %g in ('where /r "C:\Program Files" pg_dumpall.exe') do ("%g" -U postgres -w > \postgresql-backup.sql)
+            cmd /c for /f "tokens=*" %g in ('where /r "C:\Program Files" pg_dumpall.exe') do ('"%g" -U postgres -w > \postgresql-backup.sql')
             cmd /c 7z a \postgresql-backup-%computername%.7z \postgresql-backup.sql -p$backuppass
             cmd /c del /q \postgresql-backup.sql
         }
