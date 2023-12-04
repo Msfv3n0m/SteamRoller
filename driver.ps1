@@ -96,28 +96,28 @@ function CreateOUAndDistribute () {
     Write-Host "Creating OUs and Distributing Computers" -ForegroundColor Green
     $root = (Get-ADRootDSE | Select -ExpandProperty RootDomainNamingContext)
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "CN=Computers,$root" | %{
-	$input1 = "CN=" + $_.Name + ",CN=Computers," + $root
-	$input2 = "OU=" + $_.Name + "," + $root
-    New-ADOrganizationalUnit -Name $_.Name -Path $root 
-    Move-ADObject -Identity $input1 -TargetPath $input2
-    New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-    New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        $input1 = "CN=" + $_.Name + ",CN=Computers," + $root
+        $input2 = "OU=" + $_.Name + "," + $root
+        New-ADOrganizationalUnit -Name $_.Name -Path $root 
+        Move-ADObject -Identity $input1 -TargetPath $input2
+        New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
+        New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
     Get-ADComputer -Filter {OperatingSystem -like "*Windows*"} -SearchBase "OU=Domain Controllers,$root" | %{
-	$input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
-	$input2 = "OU=" + $_.Name + "," + $root
-    New-ADOrganizationalUnit -Name $_.Name -Path $root 
-    Move-ADObject -Identity $input1 -TargetPath $input2
-    New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
-    New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
-    New-GPLink -Name "ADDS (LDAP)" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        $input1 = "CN=" + $_.Name + ",OU=Domain Controllers," + $root
+        $input2 = "OU=" + $_.Name + "," + $root
+        New-ADOrganizationalUnit -Name $_.Name -Path $root 
+        Move-ADObject -Identity $input1 -TargetPath $input2
+        New-GPLink -Name "Tools" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "WinRM (http)" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "General" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "Events" -Target $input2 -LinkEnabled Yes -Enforced No
+        New-GPLink -Name "RDP" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
+        New-GPLink -Name "ADDS (LDAP)" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
 }
 
@@ -125,13 +125,13 @@ function Replace ($cd) {
     Write-Host "Inserting DC Name into GPOs" -ForegroundColor Green
     Get-ChildItem "$cd\GPO\" | %{
         $path1 = $_.FullName + "\gpreport.xml"
-	if (Test-Path -Path $path1 -PathType Leaf) {
-        	(Get-Content $path1) -replace "replaceme1", "$(hostname)" | Set-Content $path1
-	}
-        $path2 = $_.FullName + "\DomainSysvol\GPO\Machine\Preferences\Files\Files.xml"
-	if (Test-Path -Path $path2 -PathType Leaf) {
-        (Get-Content $path2) -replace "replaceme1", "$(hostname)" | Set-Content $path2
-	}
+        if (Test-Path -Path $path1 -PathType Leaf) {
+                (Get-Content $path1) -replace "replaceme1", "$(hostname)" | Set-Content $path1
+        }
+            $path2 = $_.FullName + "\DomainSysvol\GPO\Machine\Preferences\Files\Files.xml"
+        if (Test-Path -Path $path2 -PathType Leaf) {
+            (Get-Content $path2) -replace "replaceme1", "$(hostname)" | Set-Content $path2
+        }
     } 
 }
 
@@ -181,25 +181,25 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
     Catch {
     	  Write-Output "Could not access " $_
     	}
-  }
+    }
 }
 
 function ChangeADPass () {
-    Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
-    $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
-    Add-Type -AssemblyName System.Web
-    # Write-Output "Username,Password" > C:\incred.csv
-    Get-ADUser -Filter * | ?{$_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{
-    $user = $_.SAMAccountName
-    $pass = [System.Web.Security.Membership]::GeneratePassword(17,2)
-    $pass = $pass.replace(',','!')
-    $pass = $pass.replace(';','?')
+        Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
+        $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
+        Add-Type -AssemblyName System.Web
+        # Write-Output "Username,Password" > C:\incred.csv
+        Get-ADUser -Filter * | ?{$_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{
+            $user = $_.SAMAccountName
+            $pass = [System.Web.Security.Membership]::GeneratePassword(17,2)
+            $pass = $pass.replace(',','!')
+            $pass = $pass.replace(';','?')
 
-    Write-Output "$domain\$user,$pass"
-    Set-ADAccountPassword -Identity $_.SAMAccountName -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
-    $pass = $Null
-  }
-}
+            Write-Output "$domain\$user,$pass"
+            Set-ADAccountPassword -Identity $_.SAMAccountName -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
+            $pass = $Null
+        }
+    }
 }
 
 function RemoveFirewallRules($ServersList, $DCList) {
@@ -388,20 +388,39 @@ if ($job8output) {
     Write-Host $job8output
 }
 
+Write-Host "Enter a password for backups" -ForegroundColor Yellow
+$backuppass = Read-Host
+mkdir \windows\backups
+$AllServers | %{New-PSSession -cn $_}
 
-# Write-Host "Enter bone password" -ForegroundColor Yellow
-# net user bone * /add
-# Write-Host "Enter bwo password" -ForegroundColor Yellow
-# net user bwo * /add
-# Write-Host "Enter bee password" -ForegroundColor Yellow
-# net user bee * /add
-# net localgroup administrators bone bwo bee /add
-# net group "Domain admins" bone bwo bee /add
+$job10 = Start-Job -Scriptblock {
+    Get-PSSession | %{
+        icm -session $_ -scriptblock {
+            cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
+            cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
+            cmd /c for /f "skip=4 tokens=*" %i in ('wmic share get path') do (7z a %i.zip %i\* -p$backuppass)
+            cmd /c for /f "tokens=*" %g in ('dir /s /b mariabackup.exe') do ("%g" --backup --target-dir \mariadb-backup --user root)
+            cmd /c 7z a \mariadb-backup.7z \mariadb-backup\* -p$backuppass
+            cmd /c rd /s /q \mariadb-backup
+            cmd /c for /f "tokens=*" %g in ('dir /s /b mysqldump.exe') do ("%g" -u root -A > \mysql-backup.sql)
+            cmd /c 7z a \mysql-backup.7z \mysql-backup.sql -p$backuppass
+            cmd /c del /q \mysql-backup.sql
+            cmd /c for /f "tokens=*" %g in ('dir /s /b pg_dumpall.exe') do ("%g" -U postgres -w > \postgresql-backup.sql)
+            cmd /c 7z a \postgresql-backup.7z \postgresql-backup.sql -p$backuppass
+            cmd /c del /q \postgresql-backup.sql
+        }
+        Copy-Item \postgresql-backup.7z -FromSession $_ -Destination \windows\backups
+        Copy-Item \mysql-backup.7z -FromSession $_ -Destination \windows\backups
+        Copy-Item \mariadb-backup.7z -FromSession $_ -Destination \windows\backups
+    }
+}
+
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
+New-GPLink -Name "Backups" -Target "$root" -LinkEnabled Yes -Enforced Yes
 
-$job9 = Start-Job -Scriptblock {
+$job10 = Start-Job -Scriptblock {
     $AllServers | %{
         icm -cn $_ -scriptblock {
             gpupdate /force
@@ -420,6 +439,8 @@ $job9 = Start-Job -Scriptblock {
         }
     }
 }
+
+$backuppass = $Null
 
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 gpmc.msc
