@@ -189,11 +189,14 @@ function ChangeADPass () {
     $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
     Add-Type -AssemblyName System.Web
     # Write-Output "Username,Password" > C:\incred.csv
-    Get-ADUser -Filter * | ?{$_.Name -ne $env:username} | %{
-    $user = $_.Name
+    Get-ADUser -Filter * | ?{$_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{
+    $user = $_.SAMAccountName
     $pass = [System.Web.Security.Membership]::GeneratePassword(17,2)
+    $pass = $pass.replace(',','!')
+    $pass = $pass.replace(';','?')
+
     Write-Output "$domain\$user,$pass"
-    Set-ADAccountPassword -Identity $_.Name -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
+    Set-ADAccountPassword -Identity $_.SAMAccountName -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $pass -Force) 
     $pass = $Null
   }
 }
@@ -290,7 +293,7 @@ $job1 = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
 } -ArgumentList $downloads
-ChangeAdminPass
+# ChangeAdminPass
 while ($boolInput -eq $Null)
 {
     $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
@@ -386,14 +389,14 @@ if ($job8output) {
 }
 
 
-Write-Host "Enter bone password" -ForegroundColor Yellow
-net user bone * /add
-Write-Host "Enter bwo password" -ForegroundColor Yellow
-net user bwo * /add
-Write-Host "Enter bee password" -ForegroundColor Yellow
-net user bee * /add
-net localgroup administrators bone bwo bee /add
-net group "Domain admins" bone bwo bee /add
+# Write-Host "Enter bone password" -ForegroundColor Yellow
+# net user bone * /add
+# Write-Host "Enter bwo password" -ForegroundColor Yellow
+# net user bwo * /add
+# Write-Host "Enter bee password" -ForegroundColor Yellow
+# net user bee * /add
+# net localgroup administrators bone bwo bee /add
+# net group "Domain admins" bone bwo bee /add
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
