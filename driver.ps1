@@ -291,7 +291,6 @@ $job1 = Start-Job -ScriptBlock {
 } -ArgumentList $downloads
 # ChangeAdminPass
 Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
-Resume
 while ($boolInput -eq $Null)
 {
     $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
