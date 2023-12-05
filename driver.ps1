@@ -45,8 +45,6 @@ function GetTools ($cd, $downloads) {
         Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
     }
-	Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
-	Resume
 }
 
 
@@ -285,11 +283,15 @@ $DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
 $AllServers = gc all.txt
 
+Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
+    GetTools $(pwd) $downloads
 } -ArgumentList $downloads
 # ChangeAdminPass
+Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
+Resume
 while ($boolInput -eq $Null)
 {
     $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
@@ -330,8 +332,6 @@ $job8 = Start-Job -ScriptBlock{
 } -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
 $job1 | Wait-Job
-Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
-GetTools $cd $downloads
 $job2 = Start-Job -ScriptBlock {
     param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
@@ -347,7 +347,7 @@ $job6 = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
 $job2 | Wait-Job
 $job5 | Wait-Job 
 $job6 | Wait-Job 
-
+$toolsjob | wait-job
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 gpupdate /force
 Resume
@@ -435,14 +435,18 @@ Get-PSSession | %{
     if ($mariadb)
     {
         Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+        Write-Host "mariadb on $c" >> databases.txt
     }
     if ($mysql)
     {
         Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+        Write-Host "mysql on $c" >> databases.txt
+
     }
     if ($psql)
     {
         Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+        Write-Host "postgresql on $c" >> databases.txt
     }
     $currentsession = $_
     echo "THIS IS IT: $realshares"
