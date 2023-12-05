@@ -32,10 +32,10 @@ function GetTools ($cd, $downloads) {
     gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads\7z*.msi | %{Move-Item $_.FullName $cd\SharingIsCaring\7z.msi}
-    Copy-Item $downloads\modsecurity*.msi | %{Move-Item $_.FullName $cd\SharingIsCaring\modsecurity.msi}
+    gci -file $downloads\modsecurity*.msi | %{Move-Item $_.FullName $cd\SharingIsCaring\modsecurity.msi}
     Copy-Item $cd\netstat.ps1 $cd\SharingIsCaring\tools
     if (Test-Path $downloads\Sysinternals\) {
-        Copy-Item $downloads\Sysinternals\sdelete.exe $cd
+        Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\TCPVCon.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\PSExec.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
@@ -45,6 +45,8 @@ function GetTools ($cd, $downloads) {
         Copy-Item $downloads\Sysinternals\procexp.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\Sysmon.exe $cd\SharingIsCaring
     }
+	Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
+	Resume
 }
 
 
@@ -283,14 +285,11 @@ $DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
 $AllServers = gc all.txt
 
-Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 $job1 = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
-    GetTools $(pwd) $downloads
 } -ArgumentList $downloads
 # ChangeAdminPass
-Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
 while ($boolInput -eq $Null)
 {
     $i = Read-Host "Do you want to output a file of the new passwords? (yes or no)"
@@ -331,6 +330,8 @@ $job8 = Start-Job -ScriptBlock{
 } -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
 $job1 | Wait-Job
+Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
+GetTools $cd $downloads
 $job2 = Start-Job -ScriptBlock {
     param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
@@ -346,7 +347,7 @@ $job6 = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
 $job2 | Wait-Job
 $job5 | Wait-Job 
 $job6 | Wait-Job 
-$toolsjob | wait-job
+
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 gpupdate /force
 Resume
@@ -446,6 +447,7 @@ Get-PSSession | %{
     {
         Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
         Write-Host "postgresql on $c" >> databases.txt
+
     }
     $currentsession = $_
     echo "THIS IS IT: $realshares"
