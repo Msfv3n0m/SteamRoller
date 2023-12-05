@@ -391,7 +391,7 @@ if ($job8output) {
 Write-Host "Enter a password for backups" -ForegroundColor Yellow
 $backuppass = Read-Host
 mkdir \windows\backups
-$AllServers | %{New-PSSession -cn $_}
+$AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_}
 
 Get-PSSession | %{
     icm -session $_ -scriptblock {
@@ -404,7 +404,8 @@ Get-PSSession | %{
             cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
         }
         $shares = wmic share get path 
-        $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}| %{$tmp = $_; 7z a $tmp.7z $tmp\* -p$backuppass}
+        $realshares = $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}
+        $realshares | %{$tmp = $_; 7z a "$tmp-$(hostname).7z" "$tmp\*" -p$backuppass}
         if (test-path 'C:\program files\mariadb*')
         {
             $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
@@ -421,7 +422,7 @@ Get-PSSession | %{
         }
         if (test-path 'C:\Program Files\PostgreSQL*')
         {
-            $binpath = gci 'C:\Program Files\PostgreSQL*\pg_dumpall.exe' -r  | select -expandproperty fullname
+            $binpath = gci 'C:\Program Files\PostgreSQL*\bin\pg_dumpall.exe' -r  | select -expandproperty fullname
             & "$binpath" -u postgres -w > \postgresql-backup.sql 
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
             rm -r -fo \postgresql-backup.sql
@@ -431,6 +432,8 @@ Get-PSSession | %{
     Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+
+    $realshares | %{Copy-Item "$_-$(hostname).7z" -Destination C:\windows\backups -FromSession $_}
 
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
     $paths | %{
