@@ -392,7 +392,7 @@ Write-Host "Enter a password for backups" -ForegroundColor Yellow
 $backuppass = Read-Host
 mkdir \windows\backups
 $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_}
-
+$realshares = ""
 Get-PSSession | %{
     icm -session $_ -scriptblock {
         $mariadb = $False
@@ -449,7 +449,7 @@ Get-PSSession | %{
         Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     }
     $currentsession = $_
-    echo $realshares
+    echo "THIS IS IT: $realshares"
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
 
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
