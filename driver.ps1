@@ -432,8 +432,8 @@ Get-PSSession | %{
     Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
-
-    $realshares | %{Copy-Item "$_-$(hostname).7z" -Destination C:\windows\backups -FromSession $_}
+    $currentsession = $_
+    $realshares | %{Copy-Item "$_-$(hostname).7z" -Destination C:\windows\backups -FromSession $currentsession}
 
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
     $paths | %{
