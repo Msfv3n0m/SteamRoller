@@ -393,44 +393,50 @@ $backuppass = Read-Host
 mkdir \windows\backups
 $AllServers | %{New-PSSession -cn $_}
 
-$job10 = Start-Job -Scriptblock {
-    Get-PSSession | %{
-        icm -session $_ -scriptblock {
-            cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
-            cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
-            cmd /c for /f "skip=4 tokens=*" %i in ('wmic share get path') do (7z a %i.zip %i\* -p$backuppass)
-            
+Get-PSSession | %{
+    icm -session $_ -scriptblock {
+        cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
+        cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
+        cmd /c for /f "skip=4 tokens=*" %i in ('wmic share get path') do (7z a %i.zip %i\* -p$backuppass)
+        if (test-path 'C:\program files\mariadb*')
+        {
             $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
             7z a \mariadb-backup-$(hostname).7z \mariadb-backup\* -p$backuppass
             rm -r -fo \mariadb-backup
+        }
+        if (test-path 'C:\Program Files\MySQL*')
+        {
             $binpath = gci 'C:\Program Files\MySQL*\mysqldump.exe' -r  | select -expandproperty fullname
             7z a \mysql-backup-$(hostname).7z \mysql-backup.sql -p$backuppass
             rm -r -fo \mysql-backup.sql
+        }
+        if (test-path 'C:\Program Files\PostgreSQL*')
+        {
             $binpath = gci 'C:\Program Files\PostgreSQL*\pg_dumpall.exe' -r  | select -expandproperty fullname
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
             rm -r -fo \postgresql-backup.sql
         }
-        $c = $_.computername
-        Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
-        Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
-        Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+    }
+    $c = $_.computername
+    Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+    Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+    Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
 
-        $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
-        $paths | %{
-            gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
-                $content = gc $_.fullname -erroraction silentlycontinue
-                if ($content -match 'name' -and $content -match 'address' -and ($content -match 'dob' -or $content -match 'birth') -or $content -match 'ssn' -or $content -match 'social security number'){
-                    $path=$_.fullname; echo "$(hostname):$path"
-                }
+    $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
+    $paths | %{
+        gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
+            $content = gc $_.fullname -erroraction silentlycontinue
+            if ($content -match 'name' -and $content -match 'address' -and ($content -match 'dob' -or $content -match 'birth') -or $content -match 'ssn' -or $content -match 'social security number'){
+                $path=$_.fullname; echo "$(hostname):$path"
             }
         }
     }
 }
 
+
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
-New-GPLink -Name "Backups" -Target "$root" -LinkEnabled Yes -Enforced Yes
 
 $job10 = Start-Job -Scriptblock {
     $AllServers | %{
