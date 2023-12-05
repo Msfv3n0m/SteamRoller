@@ -415,14 +415,14 @@ Get-PSSession | %{
         }
         if (test-path 'C:\Program Files\MySQL*')
         {
-            $binpath = gci 'C:\Program Files\MySQL*\mysqldump.exe' -r  | select -expandproperty fullname
+            $binpath = gci -r 'C:\Program Files\MySQL*\mysqldump.exe'  | select -expandproperty fullname
             & "$binpath" -u root -A > \mysql-backup.sql 
             7z a \mysql-backup-$(hostname).7z \mysql-backup.sql -p$backuppass
             rm -r -fo \mysql-backup.sql
         }
         if (test-path 'C:\Program Files\PostgreSQL*')
         {
-            $binpath = gci 'C:\Program Files\PostgreSQL*\bin\pg_dumpall.exe' -r  | select -expandproperty fullname
+            $binpath = gci -r 'C:\Program Files\PostgreSQL\*pg_dumpall.exe' | select -first 1 -expandproperty fullname
             & "$binpath" -u postgres -w > \postgresql-backup.sql 
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
             rm -r -fo \postgresql-backup.sql
@@ -433,7 +433,7 @@ Get-PSSession | %{
     Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     $currentsession = $_
-    $realshares | %{Copy-Item "$_-$(hostname).7z" -Destination C:\windows\backups -FromSession $currentsession}
+    $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
 
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
     $paths | %{
