@@ -50,47 +50,10 @@ function GetTools ($cd, $downloads) {
 }
 
 
-function ImportGPO2 ([String]$rootdir,[switch]$formatOutput) {
-    <#
-    This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
-    #>
-    $results = New-Object System.Collections.SortedList
-    Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
-        $guid = $_.Directory.Name
-        $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
-        $results.Add($displayName, $guid)
-    }
-    if ($formatOutput)
-    {
-        $results | Format-Table -AutoSize
-    }
-    else
-    {
-        $results
-    }
-}
 
 
 
-function ImportGPO1 ($cd) {
-<#
-This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
-#>
-    Write-Host "Importing GPOs" -ForegroundColor Green
-    $GpoMap = ImportGPO2("$cd\GPO")
-    #Write-Host "Importing the following GPOs:"
-    #Write-Host
-    #$GpoMap.Keys | ForEach-Object { Write-Host $_ }
-    #Write-Host
-    #Write-Host
-    $gpoDir = "$cd\GPO"
-    $GpoMap.Keys | ForEach-Object {
-        $key = $_
-        $guid = $GpoMap[$key]
-        #Write-Host ($guid + ": " + $key)
-        Import-GPO -BackupId $guid -Path $gpoDir -TargetName "$key" -CreateIfNeeded | Out-Null
-    }
-}
+
 
 function CreateOUAndDistribute () {
     Write-Host "Creating OUs and Distributing Computers" -ForegroundColor Green
@@ -119,20 +82,6 @@ function CreateOUAndDistribute () {
         New-GPLink -Name "SMB" -Target $input2 -LinkEnabled Yes -Enforced Yes
         New-GPLink -Name "ADDS (LDAP)" -Target $input2 -LinkEnabled Yes -Enforced Yes
     }
-}
-
-function Replace ($cd) {
-    Write-Host "Inserting DC Name into GPOs" -ForegroundColor Green
-    Get-ChildItem "$cd\GPO\" | %{
-        $path1 = $_.FullName + "\gpreport.xml"
-        if (Test-Path -Path $path1 -PathType Leaf) {
-                (Get-Content $path1) -replace "replaceme1", "$(hostname)" | Set-Content $path1
-        }
-            $path2 = $_.FullName + "\DomainSysvol\GPO\Machine\Preferences\Files\Files.xml"
-        if (Test-Path -Path $path2 -PathType Leaf) {
-            (Get-Content $path2) -replace "replaceme1", "$(hostname)" | Set-Content $path2
-        }
-    } 
 }
 
 function StartSMBShare ($cd) {
@@ -196,6 +145,61 @@ function ChangeADPass () {
             $pass = $Null
         }
     }
+}
+
+
+function ImportGPO2 ([String]$rootdir,[switch]$formatOutput) {
+    <#
+    This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
+    #>
+    $results = New-Object System.Collections.SortedList
+    Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
+        $guid = $_.Directory.Name
+        $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
+        $results.Add($displayName, $guid)
+    }
+    if ($formatOutput)
+    {
+        $results | Format-Table -AutoSize
+    }
+    else
+    {
+        $results
+    }
+}
+
+function ImportGPO1 ($cd) {
+<#
+This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
+#>
+    Write-Host "Importing GPOs" -ForegroundColor Green
+    $GpoMap = ImportGPO2("$cd\GPO")
+    #Write-Host "Importing the following GPOs:"
+    #Write-Host
+    #$GpoMap.Keys | ForEach-Object { Write-Host $_ }
+    #Write-Host
+    #Write-Host
+    $gpoDir = "$cd\GPO"
+    $GpoMap.Keys | ForEach-Object {
+        $key = $_
+        $guid = $GpoMap[$key]
+        #Write-Host ($guid + ": " + $key)
+        Import-GPO -BackupId $guid -Path $gpoDir -TargetName "$key" -CreateIfNeeded | Out-Null
+    }
+}
+
+function Replace ($cd) {
+    Write-Host "Inserting DC Name into GPOs" -ForegroundColor Green
+    Get-ChildItem "$cd\GPO\" | %{
+        $path1 = $_.FullName + "\gpreport.xml"
+        if (Test-Path -Path $path1 -PathType Leaf) {
+                (Get-Content $path1) -replace "replaceme1", "$(hostname)" | Set-Content $path1
+        }
+            $path2 = $_.FullName + "\DomainSysvol\GPO\Machine\Preferences\Files\Files.xml"
+        if (Test-Path -Path $path2 -PathType Leaf) {
+            (Get-Content $path2) -replace "replaceme1", "$(hostname)" | Set-Content $path2
+        }
+    } 
 }
 
 function RemoveFirewallRules($ServersList, $DCList) {
@@ -285,7 +289,9 @@ $DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
 $AllServers = gc all.txt
 
-$job1 = Start-Job -ScriptBlock {
+$job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
+
+$extract_sysinternals_job = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
 } -ArgumentList $downloads
@@ -315,11 +321,13 @@ if ($boolInput)
     Write-Output "Username,Password" > $filePathAD
     Write-Output "Username,Password" > $filePathLocal
 }
+$job3 | Wait-Job
+$job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
 
 
 $admin = $env:username 
 
-$job8 = Start-Job -ScriptBlock{
+$ad_pass_job = Start-Job -ScriptBlock{
     param($filePathAD, $boolInput)
     $output = ChangeADPass
     if ($boolInput)
@@ -329,29 +337,26 @@ $job8 = Start-Job -ScriptBlock{
     $output = $Null
 } -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
-$job1 | Wait-Job
+$extract_sysinternals_job | Wait-Job
 Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 GetTools $cd $downloads
-$job2 = Start-Job -ScriptBlock {
+$compress_tools_job = Start-Job -ScriptBlock {
     param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
-# $job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
-# $job3 | Wait-Job
-Replace $cd
-ImportGPO1 $cd
-# $job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -InitializationScript $init -ArgumentList $cd
-# $job4 | Wait-Job
-$job5 = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
-$job6 = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
-$job2 | Wait-Job
-$job5 | Wait-Job 
-$job6 | Wait-Job 
+# Replace $cd
+# ImportGPO1 $cd
+$distribute_ou_job = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
+$start_share_job = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
+$compress_tools_job | Wait-Job
+$distribute_ou_job | Wait-Job 
+$start_share_job | Wait-Job 
+$job4 | Wait-Job
 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 gpupdate /force
 Resume
-$job7 = Start-Job -ScriptBlock {
+$local_pass_job = Start-Job -ScriptBlock {
     param($ServersList, $filePathLocal, $boolInput, $admin)
     if ($ServersList.Name -ne $Null)
     {
@@ -363,25 +368,25 @@ $job7 = Start-Job -ScriptBlock {
     }
     $output = $Null
 } -InitializationScript $passFuncs -ArgumentList $ServersList, $filePathLocal, $boolInput, $admin
-while ($job7.State -eq 'Running')
+while ($local_pass_job.State -eq 'Running')
 {
-    $job7output = Receive-Job $job7 
-    if ($job7output) {
-        Write-Host $job7output
+    $local_pass_job_output = Receive-Job $local_pass_job 
+    if ($local_pass_job_output) {
+        Write-Host $local_pass_job_output
     }
-    $job8output = Receive-Job $job8
-    if ($job8output) {
-        Write-Host $job8output
+    $ad_pass_job_output = Receive-Job $ad_pass_job
+    if ($ad_pass_job_output) {
+        Write-Host $ad_pass_job_output
     }
     Start-Sleep -Milliseconds 500
 }
 # RemoveFirewallRules $ServersList.Name $DCList.Name
 RemoveLinks $ServersList $DCList
 StopSMBShare
-$job8 | Wait-Job
-$job8output = Receive-Job $job8
-if ($job8output) {
-    Write-Host $job8output
+$ad_pass_job | Wait-Job
+$ad_pass_job_output = Receive-Job $ad_pass_job
+if ($ad_pass_job_output) {
+    Write-Host $ad_pass_job_output
 }
 
 Write-Host "Enter a password for backups" -ForegroundColor Yellow
@@ -469,7 +474,7 @@ del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\Consol
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
 
-$job10 = Start-Job -Scriptblock {
+$remove_ea_job = Start-Job -Scriptblock {
     $AllServers | %{
         icm -cn $_ -scriptblock {
             gpupdate /force
