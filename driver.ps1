@@ -144,10 +144,6 @@ function StartSMBShare ($cd) {
 $passFuncs = {
 function ChangeLocalPasswords ($ServersList, $cd, $admin) {
   Write-Host "Changing local passwords" -ForegroundColor Green
-  $newPass="Superchiapet1"
-  $cmdCommand1 = @"
-  for /f "skip=1" %a in ('net user') do net user %a $newPass 
-"@ # > null
   $ServersList | %{
     Write-Host "Attempting to change passwords on $_" -ForegroundColor Green 
     Try {
