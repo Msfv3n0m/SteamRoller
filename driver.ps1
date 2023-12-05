@@ -449,6 +449,7 @@ Get-PSSession | %{
         Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
     }
     $currentsession = $_
+    echo $realshares
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
 
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
