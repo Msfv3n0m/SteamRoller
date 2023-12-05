@@ -395,6 +395,10 @@ $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_}
 
 Get-PSSession | %{
     icm -session $_ -scriptblock {
+        $mariadb = $False
+        $mysql = $False 
+        $psql = $False 
+
         if (test-path 'C:\inetpub\ftproot')
         {
             cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
@@ -408,6 +412,7 @@ Get-PSSession | %{
         $realshares | %{$tmp = $_; 7z a "$tmp-$(hostname).7z" "$tmp\*" -p$backuppass}
         if (test-path 'C:\program files\mariadb*')
         {
+            $mariadb = $True
             $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
             & "$binpath" --backup --target-dir \mariadb-backup --user root  
             7z a \mariadb-backup-$(hostname).7z \mariadb-backup\* -p$backuppass
@@ -415,6 +420,7 @@ Get-PSSession | %{
         }
         if (test-path 'C:\Program Files\MySQL*')
         {
+            $mysql = $True
             $binpath = gci -r 'C:\Program Files\MySQL*\mysqldump.exe'  | select -expandproperty fullname
             & "$binpath" -u root -A > \mysql-backup.sql 
             7z a \mysql-backup-$(hostname).7z \mysql-backup.sql -p$backuppass
@@ -422,6 +428,7 @@ Get-PSSession | %{
         }
         if (test-path 'C:\Program Files\PostgreSQL*')
         {
+            $psql = $True
             $binpath = gci -r 'C:\Program Files\PostgreSQL\*pg_dumpall.exe' | select -first 1 -expandproperty fullname
             & "$binpath" -u postgres -w > \postgresql-backup.sql 
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
@@ -429,9 +436,18 @@ Get-PSSession | %{
         }
     }
     $c = $_.computername
-    Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
-    Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
-    Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+    if ($mariadb)
+    {
+        Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+    }
+    if ($mysql)
+    {
+        Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+    }
+    if ($psql)
+    {
+        Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
+    }
     $currentsession = $_
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
 
