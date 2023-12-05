@@ -430,7 +430,7 @@ Get-PSSession | %{
         {
             $psql = $True
             $binpath = gci -r 'C:\Program Files\PostgreSQL\*pg_dumpall.exe' | select -first 1 -expandproperty fullname
-            & "$binpath" -u postgres -w > \postgresql-backup.sql 
+            & "$binpath" -U postgres -w > \postgresql-backup.sql 
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
             rm -r -fo \postgresql-backup.sql
         }
