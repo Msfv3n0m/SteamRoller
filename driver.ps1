@@ -395,9 +395,16 @@ $AllServers | %{New-PSSession -cn $_}
 
 Get-PSSession | %{
     icm -session $_ -scriptblock {
-        cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
-        cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
-        cmd /c for /f "skip=4 tokens=*" %i in ('wmic share get path') do (7z a %i.zip %i\* -p$backuppass)
+        if (test-path 'C:\inetpub\ftproot')
+        {
+            cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
+        }
+        if (test-path 'C:\inetpub\wwwroot')
+        {
+            cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
+        }
+        $shares = wmic share get path 
+        $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}| %{$tmp = $_; 7z a $tmp.7z $tmp\* -p$backuppass}
         if (test-path 'C:\program files\mariadb*')
         {
             $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
