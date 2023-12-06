@@ -248,16 +248,16 @@ function RemoveLinks ($ServersList, $DCList) {
     {
         $ServersList| %{
             $input2 = "OU=" + $_.Name + "," + $root
-            Remove-GPLink -Name "Tools" -Target $input2
+            Remove-GPLink -Name "Tools" -Target $input2 > $Null
             # Remove-GPLink -Name "WinRM (http)" -Target $input2 
-            Remove-GPLink -Name "Events" -Target $input2
+            Remove-GPLink -Name "Events" -Target $input2 > $Null
         }
     }
     $DCList | %{
         $input2 = "OU=" + $_.Name + "," + $root
-        Remove-GPLink -Name "Tools" -Target $input2
+        Remove-GPLink -Name "Tools" -Target $input2 > $Null
         # Remove-GPLink -Name "WinRM (http)" -Target $input2 
-        Remove-GPLink -Name "Events" -Target $input2
+        Remove-GPLink -Name "Events" -Target $input2 > $Null
     }
 }
 
@@ -424,7 +424,7 @@ Get-PSSession | %{
         {
             $mariadb = $True
             $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
-            & "$binpath" --backup --target-dir \mariadb-backup --user root > $Null
+            & "$binpath" --backup --target-dir \mariadb-backup --user root
             7z a \mariadb-backup-$(hostname).7z \mariadb-backup\* -p$backuppass
             rm -r -fo \mariadb-backup
         }
@@ -449,17 +449,17 @@ Get-PSSession | %{
     Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
     if ($?)
     {
-        Write-Host "mariadb on $c" >> databases.txt
+        Write-Output "mariadb on $c" >> databases.txt
     }
     Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
     if ($?)
     {
-        Write-Host "mysql on $c" >> databases.txt
+        Write-Output "mysql on $c" >> databases.txt
     }
     Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
     if ($?)
     {
-        Write-Host "postgresql on $c" >> databases.txt
+        Write-Output "postgresql on $c" >> databases.txt
     }
     $currentsession = $_
     $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
@@ -478,7 +478,7 @@ Get-PSSession | %{
 
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
-New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes
+New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes > $Null
 
 $remove_ea_job = Start-Job -Scriptblock {
     $AllServers | %{
