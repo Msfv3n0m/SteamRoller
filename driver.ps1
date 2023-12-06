@@ -134,7 +134,6 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
 }
 
 function ChangeADPass () {
-        Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
         $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
         Add-Type -AssemblyName System.Web
         # Write-Output "Username,Password" > C:\incred.csv
@@ -301,18 +300,6 @@ $AllServers = gc all.txt
 
 $job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
 
-$admin = $env:username 
-
-$ad_pass_job = Start-Job -ScriptBlock{
-    param($filePathAD, $boolInput)
-    $output = ChangeADPass
-    if ($boolInput)
-    {
-        $output | Out-File -FilePath $filePathAD -Append
-    }
-    $output = $Null
-} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
-
 $extract_sysinternals_job = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
@@ -343,10 +330,24 @@ if ($boolInput)
     Write-Output "Username,Password" > $filePathAD
     Write-Output "Username,Password" > $filePathLocal
 }
+$admin = $env:username 
+Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
+$ad_pass_job = Start-Job -ScriptBlock{
+    param($filePathAD, $boolInput)
+    $output = ChangeADPass
+    if ($boolInput)
+    {
+        $output | Out-File -FilePath $filePathAD -Append
+    }
+    $output = $Null
+} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
+
 Write-Host "Waiting to import GPOs" -ForegroundColor Green
 $job3 | Wait-Job
 Write-Host "Importing GPOs" -ForegroundColor Green
 $job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
+
+
 
 $extract_sysinternals_job | Wait-Job
 Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
