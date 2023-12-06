@@ -424,7 +424,7 @@ Get-PSSession | %{
         {
             $mariadb = $True
             $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
-            & "$binpath" --backup --target-dir \mariadb-backup --user root  
+            & "$binpath" --backup --target-dir \mariadb-backup --user root > $Null
             7z a \mariadb-backup-$(hostname).7z \mariadb-backup\* -p$backuppass
             rm -r -fo \mariadb-backup
         }
