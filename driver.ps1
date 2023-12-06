@@ -158,14 +158,14 @@ function ImportGPO2 ([String]$rootdir,[switch]$formatOutput) {
         $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
         $results.Add($displayName, $guid)
     }
-    if ($formatOutput)
-    {
-        $results | Format-Table -AutoSize
-    }
-    else
-    {
-        $results
-    }
+    # if ($formatOutput)
+    # {
+    #     $results | Format-Table -AutoSize
+    # }
+    # else
+    # {
+    #     $results
+    # }
 }
 
 function ImportGPO1 ($cd) {
@@ -173,6 +173,12 @@ function ImportGPO1 ($cd) {
 This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
 #>
     Write-Host "Importing GPOs" -ForegroundColor Green
+        $GpoMap = New-Object System.Collections.SortedList
+    Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
+        $guid = $_.Directory.Name
+        $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
+        $GpoMap.Add($displayName, $guid)
+    }
     $GpoMap = ImportGPO2("$cd\GPO")
     #Write-Host "Importing the following GPOs:"
     #Write-Host
