@@ -102,6 +102,8 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
                 Add-Type -AssemblyName System.Web
                 Get-LocalUser | ?{$_.Name -ne $admin -and $_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
+                    $pass = $pass.replace(',','!')
+                    $pass = $pass.replace(';','?')
                     Set-LocalUser -Name $_.Name -Password (ConvertTo-SecureString -AsPlainText $pass -Force)
                     Write-Output "$(hostname)\$_,$pass"
                     $pass = $Null
@@ -113,6 +115,8 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
                 Get-WMIObject -Class Win32_UserAccount | ?{$_.Name -ne $admin} | %{
                     $name = $_.Name                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
+                    $pass = $pass.replace(',','!')
+                    $pass = $pass.replace(';','?')
                     net user $_.Name $pass > $Null
                     Write-Output "$(hostname)\$name,$pass"
                     $pass = $Null
