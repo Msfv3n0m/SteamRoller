@@ -446,6 +446,8 @@ Get-PSSession | %{
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
             rm -r -fo \postgresql-backup.sql
         }
+        $shares = wmic share get path 
+        $realshares = $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}
         return $realshares
     }
     $c = $_.computername
