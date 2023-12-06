@@ -301,6 +301,18 @@ $AllServers = gc all.txt
 
 $job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
 
+$admin = $env:username 
+
+$ad_pass_job = Start-Job -ScriptBlock{
+    param($filePathAD, $boolInput)
+    $output = ChangeADPass
+    if ($boolInput)
+    {
+        $output | Out-File -FilePath $filePathAD -Append
+    }
+    $output = $Null
+} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
+
 $extract_sysinternals_job = Start-Job -ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
@@ -335,19 +347,6 @@ Write-Host "Waiting to import GPOs" -ForegroundColor Green
 $job3 | Wait-Job
 Write-Host "Importing GPOs" -ForegroundColor Green
 $job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
-
-
-$admin = $env:username 
-
-$ad_pass_job = Start-Job -ScriptBlock{
-    param($filePathAD, $boolInput)
-    $output = ChangeADPass
-    if ($boolInput)
-    {
-        $output | Out-File -FilePath $filePathAD -Append
-    }
-    $output = $Null
-} -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
 $extract_sysinternals_job | Wait-Job
 Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
