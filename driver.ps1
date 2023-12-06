@@ -348,13 +348,16 @@ $ad_pass_job = Start-Job -ScriptBlock{
 $extract_sysinternals_job | Wait-Job
 Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 GetTools $cd $downloads
+Write-Host "Compressing tools folder" -ForegroundColor Green
 $compress_tools_job = Start-Job -ScriptBlock {
     param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
 # Replace $cd
 # ImportGPO1 $cd
+Write-Host "Creating OUs and distributing computers" -ForegroundColor Green
 $distribute_ou_job = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
+Write-Host "Starting smb share" -ForegroundColor Green
 $start_share_job = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
 $compress_tools_job | Wait-Job
 $distribute_ou_job | Wait-Job 
