@@ -179,7 +179,7 @@ This function is a derivative of a script found in Microsoft's Security Complian
         $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
         $GpoMap.Add($displayName, $guid)
     }
-    $GpoMap = ImportGPO2("$cd\GPO")
+    # $GpoMap = ImportGPO2("$cd\GPO")
     #Write-Host "Importing the following GPOs:"
     #Write-Host
     #$GpoMap.Keys | ForEach-Object { Write-Host $_ }
