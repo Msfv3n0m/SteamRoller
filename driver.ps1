@@ -467,7 +467,7 @@ Get-PSSession | %{
 
     }
     $currentsession = $_
-    echo "THIS IS IT: $realshares"
+    # echo "THIS IS IT: $realshares"
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
 
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
