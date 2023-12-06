@@ -404,9 +404,9 @@ Write-Host "Enter a password for backups" -ForegroundColor Yellow
 $backuppass = Read-Host
 mkdir \windows\backups
 $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_}
-$realshares = ""
+
 Get-PSSession | %{
-    icm -session $_ -scriptblock {
+    $realshares = icm -session $_ -scriptblock {
         $mariadb = $False
         $mysql = $False 
         $psql = $False 
@@ -446,6 +446,7 @@ Get-PSSession | %{
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
             rm -r -fo \postgresql-backup.sql
         }
+        return $realshares
     }
     $c = $_.computername
     if ($mariadb)
