@@ -411,10 +411,6 @@ $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_}
 
 Get-PSSession | %{
     $realshares = icm -session $_ -scriptblock {
-        $mariadb = $False
-        $mysql = $False 
-        $psql = $False 
-
         if (test-path 'C:\inetpub\ftproot')
         {
             cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
@@ -425,7 +421,7 @@ Get-PSSession | %{
         }
         $shares = wmic share get path 
         $realshares = $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}
-        $realshares | %{$tmp = $_; 7z a "$tmp-$(hostname).7z" "$tmp\*" -p$backuppass}
+        $realshares | %{$tmp = $_; 7z a "$tmp-$(hostname).7z" "$tmp\*" -p$backuppass; xcopy "$tmp-$(hostname).7z" \}
         if (test-path 'C:\program files\mariadb*')
         {
             $mariadb = $True
@@ -450,32 +446,24 @@ Get-PSSession | %{
             7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
             rm -r -fo \postgresql-backup.sql
         }
-        $shares = wmic share get path 
-        $realshares = $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}
-        return $realshares
     }
     $c = $_.computername
-    if ($mariadb)
+    if (Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_)
     {
-        Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
         Write-Host "mariadb on $c" >> databases.txt
     }
-    if ($mysql)
+    if (Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_)
     {
-        Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
         Write-Host "mysql on $c" >> databases.txt
-
     }
-    if ($psql)
+    if (Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_)
     {
-        Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_
         Write-Host "postgresql on $c" >> databases.txt
-
     }
     $currentsession = $_
     # echo "THIS IS IT: $realshares"
-    $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
-
+    # $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
+    get-smbshare -cimsession $c 
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
     $paths | %{
         gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
