@@ -100,7 +100,7 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
             Param($cmdCommand, $admin)
             Try {
                 Add-Type -AssemblyName System.Web
-                Get-LocalUser | ?{$_.Name -ne $admin -and $_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{                           
+                Get-LocalUser | ?{$_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{                           
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
                     $pass = $pass.replace(',','!')
                     $pass = $pass.replace(';','?')
@@ -112,8 +112,8 @@ function ChangeLocalPasswords ($ServersList, $cd, $admin) {
             }
             Catch {
                 Add-Type -AssemblyName System.Web
-                Get-WMIObject -Class Win32_UserAccount | ?{$_.Name -ne $admin} | %{
-                    $name = $_.Name                           
+                Get-WMIObject -Class Win32_UserAccount | ?{$_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{
+                    $name = $_.Name
                     $pass=[System.Web.Security.Membership]::GeneratePassword(17,2)
                     $pass = $pass.replace(',','!')
                     $pass = $pass.replace(';','?')
