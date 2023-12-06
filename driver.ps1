@@ -172,9 +172,10 @@ function ImportGPO1 ($cd) {
 <#
 This function is a derivative of a script found in Microsoft's Security Compliance Toolkit 
 #>
+    $gpoDir = "$cd\GPO"
     Write-Host "Importing GPOs" -ForegroundColor Green
         $GpoMap = New-Object System.Collections.SortedList
-    Get-ChildItem -Recurse -Include backup.xml $rootdir | ForEach-Object {
+    Get-ChildItem -Recurse -Include backup.xml $gpoDir | ForEach-Object {
         $guid = $_.Directory.Name
         $displayName = ([xml](gc $_)).GroupPolicyBackupScheme.GroupPolicyObject.GroupPolicyCoreSettings.DisplayName.InnerText
         $GpoMap.Add($displayName, $guid)
@@ -185,7 +186,6 @@ This function is a derivative of a script found in Microsoft's Security Complian
     #$GpoMap.Keys | ForEach-Object { Write-Host $_ }
     #Write-Host
     #Write-Host
-    $gpoDir = "$cd\GPO"
     $GpoMap.Keys | ForEach-Object {
         $key = $_
         $guid = $GpoMap[$key]
@@ -327,7 +327,9 @@ if ($boolInput)
     Write-Output "Username,Password" > $filePathAD
     Write-Output "Username,Password" > $filePathLocal
 }
+Write-Host "Waiting to import GPOs" -ForegroundColor Green
 $job3 | Wait-Job
+Write-Host "Importing GPOs" -ForegroundColor Green
 $job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
 
 
