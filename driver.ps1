@@ -298,7 +298,7 @@ $DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
 $AllServers = gc all.txt
 
-$job3 = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
+$replace_job = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
 
 $extract_sysinternals_job = Start-Job -ScriptBlock {
     param($downloads)
@@ -343,9 +343,9 @@ $ad_pass_job = Start-Job -ScriptBlock{
 } -InitializationScript $passFuncs -ArgumentList $filePathAD, $boolInput
 
 Write-Host "Waiting to import GPOs" -ForegroundColor Green
-$job3 | Wait-Job
+$replace_job | Wait-Job
 Write-Host "Importing GPOs" -ForegroundColor Green
-$job4 = Start-Job -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
+$ou_gpo_job = Start-Job -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
 
 
 
@@ -359,6 +359,7 @@ $compress_tools_job = Start-Job -ScriptBlock {
 } -ArgumentList $cd
 # Replace $cd
 # ImportGPO1 $cd
+$ou_gpo_job | Wait-Job
 Write-Host "Creating OUs and distributing computers" -ForegroundColor Green
 $distribute_ou_job = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
 Write-Host "Starting smb share" -ForegroundColor Green
@@ -366,7 +367,6 @@ $start_share_job = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentLis
 $compress_tools_job | Wait-Job
 $distribute_ou_job | Wait-Job 
 $start_share_job | Wait-Job 
-$job4 | Wait-Job
 
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 gpupdate /force
