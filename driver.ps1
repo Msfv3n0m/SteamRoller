@@ -138,7 +138,7 @@ function ChangeADPass () {
         $domain = $(Get-ADDomain | Select -ExpandProperty NetBIOSName)
         Add-Type -AssemblyName System.Web
         # Write-Output "Username,Password" > C:\incred.csv
-        Get-ADUser -Filter * | ?{$_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{
+        Get-ADUser -Filter * | ?{$_.Name -ne $admin -and $_.Name -ne 'bone' -and $_.Name -ne 'bwo' -and $_.Name -ne 'bee'} | %{
             $user = $_.SAMAccountName
             $pass = [System.Web.Security.Membership]::GeneratePassword(17,2)
             $pass = $pass.replace(',','!')
