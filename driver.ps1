@@ -357,8 +357,6 @@ $compress_tools_job = Start-Job -ScriptBlock {
     param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
-# Replace $cd
-# ImportGPO1 $cd
 $ou_gpo_job | Wait-Job
 Write-Host "Creating OUs and distributing computers" -ForegroundColor Green
 $distribute_ou_job = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
@@ -448,15 +446,18 @@ Get-PSSession | %{
         }
     }
     $c = $_.computername
-    if (Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_)
+    Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
+    if ($?)
     {
         Write-Host "mariadb on $c" >> databases.txt
     }
-    if (Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_)
+    Copy-Item "C:\mysql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
+    if ($?)
     {
         Write-Host "mysql on $c" >> databases.txt
     }
-    if (Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_)
+    Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
+    if ($?)
     {
         Write-Host "postgresql on $c" >> databases.txt
     }
