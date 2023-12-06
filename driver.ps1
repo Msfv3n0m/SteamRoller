@@ -461,9 +461,8 @@ Get-PSSession | %{
         Write-Host "postgresql on $c" >> databases.txt
     }
     $currentsession = $_
-    # echo "THIS IS IT: $realshares"
-    # $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
-    get-smbshare -cimsession $c 
+    $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
+    $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
     $paths | %{
         gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
