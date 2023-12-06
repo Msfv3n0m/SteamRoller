@@ -404,8 +404,8 @@ if ($ad_pass_job_output) {
 
 Write-Host "Enter a password for backups" -ForegroundColor Yellow
 $backuppass = Read-Host
-mkdir \windows\backups
-$AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_}
+mkdir \windows\backups > $Null
+$AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_} > $Null
 
 Get-PSSession | %{
     $realshares = icm -session $_ -scriptblock {
