@@ -423,10 +423,10 @@ Get-PSSession | %{
         if (test-path 'C:\program files\mariadb*')
         {
             $mariadb = $True
-            $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
-            & "$binpath" --backup --target-dir \mariadb-backup --user root
+            $binpath = gci 'C:\Program Files\MariaDB*\mysqldump.exe' -r  | select -expandproperty fullname
+            & "$binpath" -u root -A > \mariadb-backup.sql
             7z a \mariadb-backup-$(hostname).7z \mariadb-backup\* -p$args[0]
-            rm -r -fo \mariadb-backup
+            rm -r -fo \mariadb-backup.sql
         }
         if (test-path 'C:\Program Files\MySQL*')
         {
