@@ -411,12 +411,12 @@ Get-PSSession | %{
     icm -session $_ -argumentlist $backuppass -scriptblock {
         if (test-path 'C:\inetpub\')
         {
-            $args[0] | 7z a "C:\inetpub-$(hostname).7z" C:\inetpub\* -p
+            Write-output $args[0] | 7z a "C:\inetpub-$(hostname).7z" C:\inetpub\* -p
         }
         $realshares = gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4} 
         $realshares | %{
             $tmp = $_
-            $args[0] | 7z a "$tmp-$(hostname).7z" "$tmp\*" -p
+            Write-output $args[0] | 7z a "$tmp-$(hostname).7z" "$tmp\*" -p
             xcopy "$tmp-$(hostname).7z" \
         }
         if (test-path 'C:\program files\mariadb*')
