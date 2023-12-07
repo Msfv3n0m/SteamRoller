@@ -408,18 +408,21 @@ mkdir \windows\backups > $Null
 $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_} > $Null
 
 Get-PSSession | %{
-    $realshares = icm -session $_ -argumentlist $backuppass -scriptblock {
+    icm -session $_ -argumentlist $backuppass -scriptblock {
         if (test-path 'C:\inetpub\ftproot')
         {
-            $args[0] | 7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p
+            $args[0] | 7z a "C:\ftproot-$(hostname).7z" C:\inetpub\ftproot\* -p
         }
         if (test-path 'C:\inetpub\wwwroot')
         {
-            $args[0] | 7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p
+            $args[0] | 7z a "C:\wwwroot-$(hostname).7z" C:\inetpub\wwwroot\* -p
         }
-        $shares = wmic share get path 
-        $realshares = $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}
-        $realshares | %{$tmp = $_; $args[0] | 7z a "$tmp-$(hostname).7z" "$tmp\*" -p; xcopy "$tmp-$(hostname).7z" \}
+        $realshares = gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4} 
+        $realshares | %{
+            $tmp = $_
+            $args[0] | 7z a "$tmp-$(hostname).7z" "$tmp\*" -p
+            xcopy "$tmp-$(hostname).7z" \
+        }
         if (test-path 'C:\program files\mariadb*')
         {
             $mariadb = $True
@@ -461,6 +464,9 @@ Get-PSSession | %{
     {
         Write-Output "postgresql on $c" >> databases.txt
     }
+    Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
+    Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
+
     $currentsession = $_
     $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
