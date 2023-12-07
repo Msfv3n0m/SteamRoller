@@ -409,14 +409,15 @@ $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_} > $Null
 
 Get-PSSession | %{
     icm -session $_ -argumentlist $backuppass -scriptblock {
+        $arg0 = $args[0]
         if (test-path 'C:\inetpub\')
         {
-            Write-output $args[0] | 7z a "C:\inetpub-$(hostname).7z" C:\inetpub\* -p
+            $arg0 | 7z a "C:\inetpub-$(hostname).7z" C:\inetpub\* -p
         }
         $realshares = gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4} 
         $realshares | %{
             $tmp = $_
-            Write-output $args[0] | 7z a "$tmp-$(hostname).7z" "$tmp\*" -p
+            $arg0 | 7z a "$tmp-$(hostname).7z" "$tmp\*" -p
             xcopy "$tmp-$(hostname).7z" \
         }
         if (test-path 'C:\program files\mariadb*')
@@ -424,7 +425,7 @@ Get-PSSession | %{
             $mariadb = $True
             $binpath = gci 'C:\Program Files\MariaDB*\mysqldump.exe' -r  | select -expandproperty fullname
             & "$binpath" -u root -A > \mariadb-backup.sql
-            $args[0] | 7z a \mariadb-backup-$(hostname).7z \mariadb-backup.sql -p
+            $arg0 | 7z a \mariadb-backup-$(hostname).7z \mariadb-backup.sql -p
             rm -r -fo \mariadb-backup.sql
         }
         if (test-path 'C:\Program Files\MySQL*')
@@ -432,7 +433,7 @@ Get-PSSession | %{
             $mysql = $True
             $binpath = gci -r 'C:\Program Files\MySQL*\mysqldump.exe'  | select -expandproperty fullname
             & "$binpath" -u root -A > \mysql-backup.sql 
-            $args[0] | 7z a \mysql-backup-$(hostname).7z \mysql-backup.sql -p
+            $arg0 | 7z a \mysql-backup-$(hostname).7z \mysql-backup.sql -p
             rm -r -fo \mysql-backup.sql
         }
         if (test-path 'C:\Program Files\PostgreSQL*')
@@ -440,7 +441,7 @@ Get-PSSession | %{
             $psql = $True
             $binpath = gci -r 'C:\Program Files\PostgreSQL\*pg_dumpall.exe' | select -first 1 -expandproperty fullname
             & "$binpath" -U postgres -w > \postgresql-backup.sql 
-            $args[0] | 7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p
+            $arg0 | 7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p
             rm -r -fo \postgresql-backup.sql
         }
     }
@@ -461,10 +462,10 @@ Get-PSSession | %{
         Write-Output "postgresql on $c" >> databases.txt
     }
     Copy-Item "C:\inetpub-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
-
     $currentsession = $_
     $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
+
     $paths = 'C:\inetpub','C:\xampp\apache'
     $paths += $realsares
     icm -cn $c -argumentlist $paths -command {
