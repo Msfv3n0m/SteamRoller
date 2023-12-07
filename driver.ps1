@@ -465,6 +465,7 @@ Get-PSSession | %{
     $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
     $paths = 'C:\inetpub\wwwroot','C:\inetpub\ftproot','C:\xampp\apache'
+    $paths += $realsares
     $paths | %{
         gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
             $content = gc $_.fullname -erroraction silentlycontinue
