@@ -332,7 +332,7 @@ if ($boolInput)
 }
 $admin = $env:username 
 Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
-$ad_pass_job = Start-Job 'change ad passwords' -ScriptBlock{
+$ad_pass_job = Start-Job -name 'change ad passwords' -ScriptBlock{
     param($filePathAD, $boolInput)
     $output = ChangeADPass
     if ($boolInput)
