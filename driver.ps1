@@ -449,6 +449,7 @@ Get-PSSession | %{
             $arg0 | 7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p
             rm -r -fo \postgresql-backup.sql
         }
+        del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
     }
     $c = $_.computername
     Copy-Item "C:\mariadb-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
@@ -471,15 +472,16 @@ Get-PSSession | %{
     $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
 
-    $paths = 'C:\inetpub','C:\xampp\apache'
-    $paths += $realsares
+    $paths = @('C:\inetpub','C:\xampp\apache')
+    $paths += $realshares
     icm -cn $c -argumentlist $paths -command {
         $args[0] | %{
             gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
                 $content = gc $_.fullname -erroraction silentlycontinue
                 if ($content -match 'name' -and $content -match 'address' -and ($content -match 'dob' -or $content -match 'birth') -or $content -match 'ssn' -or $content -match 'social security number')
                 {
-                    $path=$_.fullname; echo "$(hostname):$path"
+                    $path=$_.fullname
+                    echo "$(hostname):$path"
                 }
             }
         }
@@ -487,7 +489,6 @@ Get-PSSession | %{
 }
 
 
-del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes > $Null
 
@@ -512,6 +513,7 @@ $remove_ea_job = Start-Job -name 'remove ea backdoors' -Scriptblock {
 }
 
 $backuppass = $Null
+del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
 Write-Host "The program has completed successfully. Now, Manually update the group policy configuration on all computers in the domain" -ForegroundColor Green
 gpmc.msc
