@@ -408,24 +408,24 @@ mkdir \windows\backups > $Null
 $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_} > $Null
 
 Get-PSSession | %{
-    $realshares = icm -session $_ -scriptblock {
+    $realshares = icm -session $_ -argumentlist $backuppass -scriptblock {
         if (test-path 'C:\inetpub\ftproot')
         {
-            cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$backuppass)
+            cmd /c if exist C:\inetpub\ftproot\ (7z a C:\inetpub\ftproot.zip C:\inetpub\ftproot\* -p$args[0])
         }
         if (test-path 'C:\inetpub\wwwroot')
         {
-            cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$backuppass)
+            cmd /c if exist C:\inetpub\wwwroot\ (7z a C:\inetpub\wwwroot.zip C:\inetpub\wwwroot\* -p$args[0])
         }
         $shares = wmic share get path 
         $realshares = $shares.trim() | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}
-        $realshares | %{$tmp = $_; 7z a "$tmp-$(hostname).7z" "$tmp\*" -p$backuppass; xcopy "$tmp-$(hostname).7z" \}
+        $realshares | %{$tmp = $_; 7z a "$tmp-$(hostname).7z" "$tmp\*" -p$args[0]; xcopy "$tmp-$(hostname).7z" \}
         if (test-path 'C:\program files\mariadb*')
         {
             $mariadb = $True
             $binpath = gci 'C:\Program Files\MariaDB*\mariabackup.exe' -r  | select -expandproperty fullname
             & "$binpath" --backup --target-dir \mariadb-backup --user root
-            7z a \mariadb-backup-$(hostname).7z \mariadb-backup\* -p$backuppass
+            7z a \mariadb-backup-$(hostname).7z \mariadb-backup\* -p$args[0]
             rm -r -fo \mariadb-backup
         }
         if (test-path 'C:\Program Files\MySQL*')
@@ -433,7 +433,7 @@ Get-PSSession | %{
             $mysql = $True
             $binpath = gci -r 'C:\Program Files\MySQL*\mysqldump.exe'  | select -expandproperty fullname
             & "$binpath" -u root -A > \mysql-backup.sql 
-            7z a \mysql-backup-$(hostname).7z \mysql-backup.sql -p$backuppass
+            7z a \mysql-backup-$(hostname).7z \mysql-backup.sql -p$args[0]
             rm -r -fo \mysql-backup.sql
         }
         if (test-path 'C:\Program Files\PostgreSQL*')
@@ -441,7 +441,7 @@ Get-PSSession | %{
             $psql = $True
             $binpath = gci -r 'C:\Program Files\PostgreSQL\*pg_dumpall.exe' | select -first 1 -expandproperty fullname
             & "$binpath" -U postgres -w > \postgresql-backup.sql 
-            7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$backuppass
+            7z a \postgresql-backup-$(hostname).7z \postgresql-backup.sql -p$args[0]
             rm -r -fo \postgresql-backup.sql
         }
     }
