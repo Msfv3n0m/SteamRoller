@@ -403,7 +403,12 @@ if ($ad_pass_job_output) {
 }
 
 Write-Host "Enter a password for backups" -ForegroundColor Yellow
-$backuppass = Read-Host
+$securestr = read-host -assecurestring
+$Marshal = [System.Runtime.InteropServices.Marshal]
+$Bstr = $Marshal::SecureStringToBSTR($securestr)
+$backuppass = $Marshal::PtrToStringAuto($Bstr)
+$Marshal::ZeroFreeBSTR($Bstr)
+
 mkdir \windows\backups > $Null
 $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_} > $Null
 
