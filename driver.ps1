@@ -298,9 +298,9 @@ $DCList | Select -ExpandProperty Name >> all.txt
 $DCList | Select -ExpandProperty Name >> dc.txt
 $AllServers = gc all.txt
 
-$replace_job = Start-Job -ScriptBlock ${Function:Replace} -ArgumentList $cd
+$replace_job = Start-Job -name 'replace hostname' -ScriptBlock ${Function:Replace} -ArgumentList $cd
 
-$extract_sysinternals_job = Start-Job -ScriptBlock {
+$extract_sysinternals_job = Start-Job -name 'extract sysinternals'-ScriptBlock {
     param($downloads)
     gci -file $downloads | ?{$_.name -like "*Sysinternals*"} | %{Expand-Archive $_.Fullname $downloads\Sysinternals -Force}
 } -ArgumentList $downloads
@@ -332,7 +332,7 @@ if ($boolInput)
 }
 $admin = $env:username 
 Write-Host "Changing Active Directory Users' Passwords" -ForegroundColor Green
-$ad_pass_job = Start-Job -ScriptBlock{
+$ad_pass_job = Start-Job 'change ad passwords' -ScriptBlock{
     param($filePathAD, $boolInput)
     $output = ChangeADPass
     if ($boolInput)
@@ -345,7 +345,7 @@ $ad_pass_job = Start-Job -ScriptBlock{
 Write-Host "Waiting to import GPOs" -ForegroundColor Green
 $replace_job | Wait-Job
 Write-Host "Importing GPOs" -ForegroundColor Green
-$ou_gpo_job = Start-Job -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
+$ou_gpo_job = Start-Job -name 'import gpos' -ScriptBlock ${Function:ImportGPO1} -ArgumentList $cd
 
 
 
@@ -353,15 +353,15 @@ $extract_sysinternals_job | Wait-Job
 Write-Host "Copying tools to SharingIsCaring folder" -ForegroundColor Green
 GetTools $cd $downloads
 Write-Host "Compressing tools folder" -ForegroundColor Green
-$compress_tools_job = Start-Job -ScriptBlock {
+$compress_tools_job = Start-Job -name 'compress tools' -ScriptBlock {
     param($cd)
     Compress-Archive $cd\SharingIsCaring\tools $cd\SharingIsCaring\tools.zip
 } -ArgumentList $cd
 $ou_gpo_job | Wait-Job
 Write-Host "Creating OUs and distributing computers" -ForegroundColor Green
-$distribute_ou_job = Start-Job -ScriptBlock ${Function:CreateOUAndDistribute}
+$distribute_ou_job = Start-Job -name 'create ous and distribute hosts' -ScriptBlock ${Function:CreateOUAndDistribute}
 Write-Host "Starting smb share" -ForegroundColor Green
-$start_share_job = Start-Job -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
+$start_share_job = Start-Job -name 'start smb share' -ScriptBlock ${Function:StartSMBShare} -ArgumentList $cd
 $compress_tools_job | Wait-Job
 $distribute_ou_job | Wait-Job 
 $start_share_job | Wait-Job 
@@ -369,7 +369,7 @@ $start_share_job | Wait-Job
 Write-Host "`nManually upate the group policy configuration on each member in the domain" -ForegroundColor Yellow
 gpupdate /force
 Resume
-$local_pass_job = Start-Job -ScriptBlock {
+$local_pass_job = Start-Job -name 'change local passwords' -ScriptBlock {
     param($ServersList, $filePathLocal, $boolInput, $admin)
     if ($ServersList.Name -ne $Null)
     {
@@ -484,7 +484,7 @@ del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\Consol
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes > $Null
 
-$remove_ea_job = Start-Job -Scriptblock {
+$remove_ea_job = Start-Job -name 'remove ea backdoors' -Scriptblock {
     $AllServers | %{
         icm -cn $_ -scriptblock {
             gpupdate /force
