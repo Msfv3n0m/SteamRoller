@@ -476,7 +476,7 @@ Get-PSSession | %{
     $paths += $realshares
     icm -cn $c -argumentlist $paths -command {
         $args[0] | %{
-            gci -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
+            gci -file -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
                 $content = gc $_.fullname -erroraction silentlycontinue
                 if ($content -match 'name' -and $content -match 'address' -and ($content -match 'dob' -or $content -match 'birth') -or $content -match 'ssn' -or $content -match 'social security number')
                 {
