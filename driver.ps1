@@ -409,13 +409,9 @@ $AllServers | ?{$_ -ne $(hostname)}| %{New-PSSession -cn $_} > $Null
 
 Get-PSSession | %{
     icm -session $_ -argumentlist $backuppass -scriptblock {
-        if (test-path 'C:\inetpub\ftproot')
+        if (test-path 'C:\inetpub\')
         {
-            $args[0] | 7z a "C:\ftproot-$(hostname).7z" C:\inetpub\ftproot\* -p
-        }
-        if (test-path 'C:\inetpub\wwwroot')
-        {
-            $args[0] | 7z a "C:\wwwroot-$(hostname).7z" C:\inetpub\wwwroot\* -p
+            $args[0] | 7z a "C:\inetpub-$(hostname).7z" C:\inetpub\* -p
         }
         $realshares = gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4} 
         $realshares | %{
@@ -464,8 +460,7 @@ Get-PSSession | %{
     {
         Write-Output "postgresql on $c" >> databases.txt
     }
-    Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
-    Copy-Item "C:\postgresql-backup-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
+    Copy-Item "C:\inetpub-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
 
     $currentsession = $_
     $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
