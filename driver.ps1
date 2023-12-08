@@ -518,7 +518,8 @@ $remove_ea_job = Start-Job -name 'remove ea backdoors' -Scriptblock {
         }
     }
 }
-
+$securestr = $Null
+$Bstr = $Null
 $backuppass = $Null
 del $env:homepath\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
