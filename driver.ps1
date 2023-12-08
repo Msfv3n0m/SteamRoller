@@ -469,12 +469,12 @@ Get-PSSession | %{
     }
     Copy-Item "C:\inetpub-$c.7z" -Destination C:\windows\backups -FromSession $_ -Erroraction silentlycontinue
     $currentsession = $_
-    $realshares = icm -cn $c -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
+    $realshares = icm -session $_ -command {gwmi win32_share | select -expandproperty path | ?{$_ -notlike 'C:\windows*' -and $_.length -gt 4}}
     $realshares | %{Copy-Item "$_-$c.7z" -Destination C:\windows\backups -FromSession $currentsession}
 
     $paths = @('C:\inetpub','C:\xampp\apache')
     $paths += $realshares
-    icm -cn $c -argumentlist $paths -command {
+    icm -session $currentsession -argumentlist $paths -command {
         $args[0] | %{
             gci -file -r $_ -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib | %{
                 $content = gc $_.fullname -erroraction silentlycontinue
@@ -487,7 +487,7 @@ Get-PSSession | %{
         }
     } >> pii.txt
 
-    icm -cn $c -command {
+    icm -session $currentsession -command {
         gci -file -r \inetpub -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib, *.tmp, *.config, *.log | select -expandproperty fullname | ?{(gc $_ | sls -patt "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")} | %{
             $path = $_
             echo "$(hostname):$path"
