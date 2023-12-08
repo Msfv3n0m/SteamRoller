@@ -486,6 +486,13 @@ Get-PSSession | %{
             }
         }
     } >> pii.txt
+
+    icm -cn $c -command {
+        gci -file -r \inetpub -erroraction silentlycontinue -exclude *.exe, *.dll, *.lib, *.tmp, *.config, *.log | select -expandproperty fullname | ?{(gc $_ | sls -patt "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")} | %{
+            $path = $_
+            echo "$(hostname):$path"
+        }
+    } >> backends.txt
 }
 
 
