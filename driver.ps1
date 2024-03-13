@@ -31,9 +31,8 @@ function GetTools ($cd, $downloads) {
     gci -file $downloads | ?{$_.name -like "*hollows_hunter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*processhacker*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads | ?{$_.name -like "*bluespawn*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
+    gci -file $downloads | ?{$_.name -like "*cutter*"} | %{Copy-Item $_.fullname $cd\SharingIsCaring\tools}
     gci -file $downloads\7z*.msi | %{Move-Item $_.FullName $cd\SharingIsCaring\7z.msi}
-    gci -file $downloads\modsecurity*.msi | %{Move-Item $_.FullName $cd\SharingIsCaring\modsecurity.msi}
-    Copy-Item $cd\netstat.ps1 $cd\SharingIsCaring\tools
     if (Test-Path $downloads\Sysinternals\) {
         Copy-Item $downloads\Sysinternals\sdelete.exe $cd\SharingIsCaring\tools
         Copy-Item $downloads\Sysinternals\TCPVCon.exe $cd\SharingIsCaring\tools
@@ -48,11 +47,6 @@ function GetTools ($cd, $downloads) {
 	Write-Host "`nEnsure that the appropriate tools are in the .\SharingIsCaring\tools folder" -ForegroundColor Yellow
 	Resume
 }
-
-
-
-
-
 
 
 function CreateOUAndDistribute () {
@@ -336,7 +330,6 @@ gpupdate /force
 Resume
 
 RemoveLinks $ServersList $DCList
-StopSMBShare
 
 Write-Host "Enter a password for backups" -ForegroundColor Yellow
 $securestr = read-host -assecurestring
@@ -435,25 +428,6 @@ Get-PSSession | %{
 
 New-GPLink -Name "PSLogging" -Target "$root" -LinkEnabled Yes -Enforced Yes > $Null
 
-$remove_ea_job = Start-Job -name 'remove ea backdoors' -Scriptblock {
-    $AllServers | %{
-        icm -cn $_ -scriptblock {
-            gpupdate /force
-
-            takeown /F C:\Windows\System32\sethc.exe
-            icacls C:\Windows\System32\sethc.exe /grant administrators:F
-            del C:\Windows\System32\sethc.exe
-
-            takeown /F C:\Windows\System32\utilman.exe
-            icacls C:\Windows\System32\utilman.exe /grant administrators:F
-            del C:\Windows\System32\utilman.exe
-
-            takeown /F C:\Windows\System32\osk.exe
-            icacls C:\Windows\System32\osk.exe /grant administrators:F
-            del C:\Windows\System32\osk.exe
-        }
-    }
-}
 $securestr = $Null
 $Bstr = $Null
 $backuppass = $Null
